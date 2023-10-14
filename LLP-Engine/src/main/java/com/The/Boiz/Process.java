@@ -3,59 +3,49 @@ package com.The.Boiz;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
-public class Process<T> extends Thread{
+public class Process extends Thread{
     
     private Boolean done;
-    private T curState;
-    private List<T> globalState;
-    private List<Process<T>> otherThreads;
-    private Function<List<T>, T> advance;
-    private Function<List<T>, Boolean> B;
+    private List<Integer> globalState;
+    private List<Process> otherThreads;
+    private BiFunction<Integer, List<Integer>, Integer> advance;
+    private BiFunction<Integer, List<Integer>, Boolean> forbidden;
 
-    public Process(T startVal, Function<List<T>, T> alpha, Function<List<T>, Boolean> B, List<Process<T>> otherThreads) {
-        this.globalState = new ArrayList<T>();
-        this.curState = startVal;
-        this.B = B;
+    public Process(Integer startVal, BiFunction<Integer, List<Integer>, Integer> alpha, BiFunction<Integer, List<Integer>, Boolean> B, List<Integer> globalState) {
+	ThreadId.get(); // get a threadID
+        this.globalState = globalState; // reference
+        globalState.set(ThreadId.get(), startVal);
+        this.forbidden = B;
         this.advance = alpha;
         this.done = false;
         this.otherThreads = otherThreads;
-        
+    }
+
+    public Boolean isForbidden() {
+	return forbidden.apply(ThreadId.get(), globalState);
     }
 
     public void Finish() {
         done = true;
     }
 
-    public void updateState(int thread, T newVal) {
+    public void updateState(int thread, Integer newVal) {
         System.out.println("recv " + newVal + " from thread " + thread);
         globalState.set(thread, newVal);
     }
 
-    public T getProcessState() {
-        return curState;
+    public Integer getProcessState() {
+        return globalState.get(ThreadId.get());
     }
 
     public void run() {
-        ThreadId.get(); // init the thread id
-        for(Process<T> proc: otherThreads) {
-            globalState.add(proc.getProcessState());
-        }
-
         // while forbidden advance
         while(!done) {
-            if (B.apply(globalState)) {
+            if (forbidden.apply(ThreadId.get(), globalState)) {
                 System.out.println(ThreadId.get() + " advanced");
-                globalState.set(ThreadId.get(), advance.apply(globalState));
-            }
-            try {
-                Thread.sleep(1000, 0);
-            } catch(InterruptedException e) {
-                e.printStackTrace();
-            }
-            for(Process<T> proc: otherThreads) {
-                proc.Finish();
+                globalState.set(ThreadId.get(), advance.apply(ThreadId.get(), globalState));
             }
         }
     }
