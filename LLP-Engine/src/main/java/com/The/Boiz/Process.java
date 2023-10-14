@@ -25,11 +25,15 @@ public class Process extends Thread{
     }
 
     public Boolean isForbidden() {
-	return forbidden.apply(myTID, globalState);
+	return forbidden.apply(myTID+1, globalState);
     }
 
     public void finish() {
         done = true;
+    }
+
+    public static void resetTID(){
+        nextTID = 0;
     }
 
     public void updateState(int thread, Integer newVal) {
@@ -45,8 +49,8 @@ public class Process extends Thread{
         // while forbidden advance
 	System.out.println("Hello from thread: " + myTID + " -> " + Thread.currentThread().getId());
         while(!done) { 
-            if (forbidden.apply(myTID, globalState)) {
-                globalState.set(myTID+1, advance.apply(myTID, globalState));
+            if (forbidden.apply(myTID+1, globalState)) {
+                globalState.set(myTID+1, advance.apply(myTID+1, globalState));
             }
         }
     }
