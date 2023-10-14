@@ -14,7 +14,8 @@ public class Runner
     public static void main(String[] args )
     {
         List<Integer> l = new ArrayList<Integer>();
-
+	
+	l.add(0);
         for(int i = 0; i < 16; i ++){
             l.add(i);
         }
@@ -26,34 +27,38 @@ public class Runner
 
     public static List<Integer> reduce(List<Integer> A)
     {
-        int n = A.size();
+        int n = A.size() - 1;
 
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-            if(j >= (n/2) - 1){
+	    j++;
+            if(j < (n/2)){
                 return G.get(j) < G.get(2*j) + G.get(2*j+1);
             }
             else{
-                return G.get(j) < A.get((2*j) - n + 1) + A.get((2*j) - n + 2);
+                return G.get(j) < A.get((2*j) - n+1) + A.get((2*j) - n + 2);
             }
         };
 
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
-
-            if(j >= (n/2) - 1){
-                return G.get(2*j) + G.get(2*j+1);
+	    j++;
+            if(j < (n/2) - 1){
+		return G.get(j) + 1;
+                // return G.get(2*j) + G.get(2*j+1);
             }
             else{
-                return A.get((2*j) - n + 1) + A.get((2*j) - n + 2);
+		return G.get(j) + 1;
+                // return A.get((2*j) - n + 1) + A.get((2*j) - n + 2);
             }
         };
 
         // Init Global State
         List<Integer> G = new ArrayList<Integer>();
-        List<Process> P = new ArrayList<Process>();
+	List<Process> P = new ArrayList<Process>();
+	G.add(0);
         for(int i = 0; i < n - 1; i++){
-            G.add(Integer.MIN_VALUE);
+            G.add(0);
             Process p = new Process(advance, isForbidden, G);
-            P.add(p);
+	    P.add(p);
         }
 
         for(Process p : P){
@@ -67,6 +72,7 @@ public class Runner
                     allNotForbidden = Boolean.FALSE;
                 }
             }
+	    System.out.println(G);
             if(allNotForbidden){
                 break;
             }

@@ -7,6 +7,8 @@ import java.util.function.BiFunction;
 
 public class Process extends Thread{
 
+    private static int nextTID = 0;
+    private int myTID;
     private Boolean done;
     private List<Integer> globalState;
     private List<Process> otherThreads;
@@ -14,16 +16,16 @@ public class Process extends Thread{
     private BiFunction<Integer, List<Integer>, Boolean> forbidden;
 
     public Process(BiFunction<Integer, List<Integer>, Integer> alpha, BiFunction<Integer, List<Integer>, Boolean> B, List<Integer> globalState) {
-	    ThreadId.get(); // get a threadID
         this.globalState = globalState; // reference
         this.forbidden = B;
         this.advance = alpha;
         this.done = false;
         this.otherThreads = otherThreads;
+	this.myTID = nextTID++;
     }
 
     public Boolean isForbidden() {
-	return forbidden.apply(ThreadId.get(), globalState);
+	return forbidden.apply(myTID, globalState);
     }
 
     public void finish() {
@@ -36,14 +38,15 @@ public class Process extends Thread{
     }
 
     public Integer getProcessState() {
-        return globalState.get(ThreadId.get());
+        return globalState.get(myTID);
     }
 
     public void run() {
         // while forbidden advance
-        while(!done) {
-            if (forbidden.apply(ThreadId.get(), globalState)) {
-                globalState.set(ThreadId.get(), advance.apply(ThreadId.get(), globalState));
+	System.out.println("Hello from thread: " + myTID + " -> " + Thread.currentThread().getId());
+        while(!done) { 
+            if (forbidden.apply(myTID, globalState)) {
+                globalState.set(myTID+1, advance.apply(myTID, globalState));
             }
         }
     }
