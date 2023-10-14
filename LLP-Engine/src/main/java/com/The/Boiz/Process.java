@@ -50,7 +50,7 @@ public class Process extends Thread{
 	System.out.println("Hello from thread: " + myTID + " -> " + Thread.currentThread().getId());
         while(!done) { 
             if (forbidden.apply(myTID+1, globalState)) {
-                globalState.set(myTID+1, advance.apply(myTID+1, globalState));
+                globalState.set(myTID, advance.apply(myTID+1, globalState));
             }
         }
     }
