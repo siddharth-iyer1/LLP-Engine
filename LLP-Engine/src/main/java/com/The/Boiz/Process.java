@@ -6,17 +6,16 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 public class Process extends Thread{
-    
+
     private Boolean done;
     private List<Integer> globalState;
     private List<Process> otherThreads;
     private BiFunction<Integer, List<Integer>, Integer> advance;
     private BiFunction<Integer, List<Integer>, Boolean> forbidden;
 
-    public Process(Integer startVal, BiFunction<Integer, List<Integer>, Integer> alpha, BiFunction<Integer, List<Integer>, Boolean> B, List<Integer> globalState) {
-	ThreadId.get(); // get a threadID
+    public Process(BiFunction<Integer, List<Integer>, Integer> alpha, BiFunction<Integer, List<Integer>, Boolean> B, List<Integer> globalState) {
+	    ThreadId.get(); // get a threadID
         this.globalState = globalState; // reference
-        globalState.set(ThreadId.get(), startVal);
         this.forbidden = B;
         this.advance = alpha;
         this.done = false;
@@ -27,7 +26,7 @@ public class Process extends Thread{
 	return forbidden.apply(ThreadId.get(), globalState);
     }
 
-    public void Finish() {
+    public void finish() {
         done = true;
     }
 
@@ -44,7 +43,6 @@ public class Process extends Thread{
         // while forbidden advance
         while(!done) {
             if (forbidden.apply(ThreadId.get(), globalState)) {
-                System.out.println(ThreadId.get() + " advanced");
                 globalState.set(ThreadId.get(), advance.apply(ThreadId.get(), globalState));
             }
         }
