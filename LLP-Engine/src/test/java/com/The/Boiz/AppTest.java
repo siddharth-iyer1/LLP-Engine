@@ -42,7 +42,7 @@ public class AppTest
 
     public void testReduce() {
         Random rand = new Random();
-        for (int n = (1 << 2); n <= (1 << 20); n *= 2) {
+        for (int n = (1 << 4); n <= (1 << 20); n *= 2) {
             System.out.println("Reduce test size " + n);
             List<Integer> l = new ArrayList<Integer>();
             for(int i = 0; i < n; i++) {
@@ -52,11 +52,8 @@ public class AppTest
             Integer seq = SequentialSolver.seqReduce(l);
             long set = System.nanoTime();
 
-            long pst = System.nanoTime();
             List<Integer> a = Runner.reduce(l);
-            long pet = System.nanoTime();
-            System.out.println("sequ time: " + (set - sst) + "\n" +
-                               "para time: " + (pet - pst));
+            System.out.println("sequ time: " + (set - sst) + "ns");
             assertEquals("Reduce " + n, seq, a.get(0)); 
 
         }

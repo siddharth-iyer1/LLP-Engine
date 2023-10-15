@@ -103,43 +103,16 @@ public class Runner
 
         // Init Global State
         List<Integer> G = new ArrayList<Integer>();
-	    List<Process> P = new ArrayList<Process>();
         for(int i = 0; i < n - 1; i++){
             G.add(Integer.MIN_VALUE);
-            Process p = new Process(advance, isForbidden, G);
-	        P.add(p);
         }
 
-        for(Process p : P){
-            p.start();
-        }
+        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 8);
+        llpRunner.run();
 
-        while(true){
-            Boolean allNotForbidden = Boolean.TRUE;
-            for(Process p : P){
-                if(p.isForbidden()){
-                    allNotForbidden = Boolean.FALSE;
-                }
-            }
-            if(allNotForbidden){
-                break;
-            }
-        }
+        System.out.println("Reduce LLP time: " + llpRunner.GetRuntime() + "ns");
 
-        for(Process p : P){
-            p.finish();
-        }
-
-        for(Process p : P){
-            try{
-                p.join();
-            }
-            catch(InterruptedException e){
-                System.out.println("Assballs");
-            }
-        }
-        Process.resetTID();
-        return G;
+        return llpRunner.GetGlobalState();
     }
 
     public static List<Integer> scan(List<Integer> A){
@@ -207,9 +180,13 @@ public class Runner
 	    List<Process> P = new ArrayList<Process>();
         for(int i = 0; i < (2*n) - 1; i++){
             G.add(Integer.MIN_VALUE);
-            Process p = new Process(advance, isForbidden, G);
-	        P.add(p);
         }
+
+        for(int i = 0; i < ((2*n) - 1) / 8; i++){
+            Process p = new Process(advance, isForbidden, G, 8);
+            P.add(p);
+        }
+
         for(Process p : P){
             p.start();
         }
@@ -280,7 +257,9 @@ public class Runner
                 G.add(0);
             else
                 G.add(Integer.MAX_VALUE);
-            Process p = new Process(advance, isForbidden, G);
+        }
+        for (int i = 0; i < n/8; i ++) {
+            Process p = new Process(advance, isForbidden, G, 8);
 	        P.add(p);
         }
         for(Process p : P){

@@ -32,7 +32,7 @@ public class SequentialSolver
 
     public static List<Integer> seqBellmanFord(List<List<Integer>> W) {
         ArrayList<Integer> d = new ArrayList<Integer>();
-        for(List<Integer> row: W) {
+        for(int i = 0; i < W.size(); i++) {
             d.add(Integer.MAX_VALUE);
         }
         d.set(0, 0);
