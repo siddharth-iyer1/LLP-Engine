@@ -2,7 +2,6 @@ package com.The.Boiz;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.BiFunction;
 
 /**
@@ -15,16 +14,15 @@ public class Runner
     {
         List<Integer> l = new ArrayList<Integer>();
 	
-	l.add(0);
         for(int i = 0; i < 16; i ++){
             l.add(i);
         }
 
-        // List<Integer> a = reduce(l);
-        // Process.resetTID();
+        List<Integer> a = reduce(l);
+        Process.resetTID();
         // List<Integer> b = scan(l);
-        // System.out.println(l.toString());
-        // System.out.println(a.toString());
+        System.out.println("input: " + l);
+        System.out.println("reduce: " + a);
         // System.out.println(b);
 
         List<List<Integer>> W = new ArrayList<List<Integer>>();
@@ -48,34 +46,45 @@ public class Runner
 
     public static List<Integer> reduce(List<Integer> A)
     {
-        int n = A.size() - 1;
+        int n = A.size();
 
+        //    10
+        //  3   7
+        // 1 2 3 4
+        // results in array
+        // 10 3 7 
+        // the second half of the array should be the sum of children in A
+        // G[1] = A[0] + A[1]
+        // G[2] = A[2] + A[3]
+
+        // for N = 8
+        // First half of list should be processes 0, 1, 2
+        // second half should be processes 3, 4, 5, 6
+        // 3 -> 0, 1
+        // 4 -> 2, 3
+        // 5 -> 4, 5
+        // 6 -> 6, 7
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-	    // j++;
-            if(j < (n/2)){
-                return G.get(j) < G.get(2*j) + G.get(2*j+1);
+            if(j < ((n/2) - 1)){
+                return G.get(j) < G.get(2*j + 1) + G.get(2*j + 2);
             }
             else{
-                return G.get(j) < A.get((2*j) - n+1) + A.get((2*j) - n + 2);
+                return G.get(j) < A.get((2*j) - n + 2) + A.get((2*j) - n + 3);
             }
         };
 
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
-	    // j++;
-            if(j < (n/2) - 1){
-		        return G.get(j) + 1;
-                // return G.get(2*j) + G.get(2*j+1);
+            if(j < ((n/2) - 1)){
+                return G.get(2*j + 1) + G.get(2*j + 2);
             }
             else{
-		        return G.get(j) + 1;
-                // return A.get((2*j) - n + 1) + A.get((2*j) - n + 2);
+                return A.get((2*j) - n + 2) + A.get((2*j) - n + 3);
             }
         };
 
         // Init Global State
         List<Integer> G = new ArrayList<Integer>();
 	    List<Process> P = new ArrayList<Process>();
-	    G.add(0);
         for(int i = 0; i < n - 1; i++){
             G.add(0);
             Process p = new Process(advance, isForbidden, G);
@@ -93,7 +102,7 @@ public class Runner
                     allNotForbidden = Boolean.FALSE;
                 }
             }
-	    System.out.println(G);
+	        System.out.println(G);
             if(allNotForbidden){
                 break;
             }
@@ -137,10 +146,10 @@ public class Runner
         };
     
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
-            if(j == 1){
+            if(j == 0){
                 return 0;
             }
-            else if(j % 2 == 0){
+            else if(j % 2 == 1){
                 return G.get(j/2);
             }
             else{
@@ -206,7 +215,6 @@ public class Runner
             return ret;
         };
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-            j--;
             for(Integer i: pre.apply(j, W)) { //TODO: make sure to precompute pre list rather than call every time
                 if(G.get(j) > G.get(i) + W.get(i).get(j))
                     return true;
@@ -215,7 +223,6 @@ public class Runner
         };
 
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
-            j--;
             int min = Integer.MAX_VALUE;
             for(int i : pre.apply(j, W)){
                 if(G.get(i) + W.get(i).get(j) < min && G.get(i) != Integer.MAX_VALUE){
@@ -266,8 +273,6 @@ public class Runner
         }
         return G;
     }
-// public Process(Integer startVal, BiFunction<Integer, List<Integer>, Integer> alpha, BiFunction<Integer, List<Integer>, Boolean> B, List<Integer> globalState) {
-
 }
 
 

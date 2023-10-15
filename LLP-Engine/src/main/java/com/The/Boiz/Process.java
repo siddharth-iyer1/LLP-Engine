@@ -1,7 +1,5 @@
 package com.The.Boiz;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -11,7 +9,6 @@ public class Process extends Thread{
     private int myTID;
     private Boolean done;
     private List<Integer> globalState;
-    private List<Process> otherThreads;
     private BiFunction<Integer, List<Integer>, Integer> advance;
     private BiFunction<Integer, List<Integer>, Boolean> forbidden;
 
@@ -20,12 +17,11 @@ public class Process extends Thread{
         this.forbidden = B;
         this.advance = alpha;
         this.done = false;
-        this.otherThreads = otherThreads;
-	this.myTID = nextTID++;
+    	this.myTID = nextTID++;
     }
 
     public Boolean isForbidden() {
-	return forbidden.apply(myTID+1, globalState);
+	    return forbidden.apply(myTID, globalState);
     }
 
     public void finish() {
@@ -49,8 +45,8 @@ public class Process extends Thread{
         // while forbidden advance
 	System.out.println("Hello from thread: " + myTID + " -> " + Thread.currentThread().getId());
         while(!done) { 
-            if (forbidden.apply(myTID+1, globalState)) {
-                globalState.set(myTID, advance.apply(myTID+1, globalState));
+            if (forbidden.apply(myTID, globalState)) {
+                globalState.set(myTID, advance.apply(myTID, globalState));
             }
         }
     }
