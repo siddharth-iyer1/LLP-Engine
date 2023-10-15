@@ -20,10 +20,10 @@ public class Runner
 
         List<Integer> a = reduce(l);
         Process.resetTID();
-        // List<Integer> b = scan(l);
+        List<Integer> b = scan(l);
         System.out.println("input: " + l);
         System.out.println("reduce: " + a);
-        // System.out.println(b);
+        System.out.println("scan: " + b);
 
         List<List<Integer>> W = new ArrayList<List<Integer>>();
         for(int i = 0; i < 5; i++) {
@@ -126,45 +126,50 @@ public class Runner
     public static List<Integer> scan(List<Integer> A){
         List<Integer> S = reduce(A);
         Process.resetTID();
-        int n = A.size() - 1;
+        int n = A.size();
 
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-            if(j == 1){
+            if(j == 0){
                 return G.get(j) < 0;
             }
-            else if(j % 2 == 0){
-                return G.get(j) < G.get(j/2);
+            else if(j % 2 == 1){ // left
+                return G.get(j) < G.get((j-1)/2); // copy parent
             }
-            else{
-                if(j < n){
-                    return G.get(j) < S.get(j - 1) + G.get(j/2);
+            else{ // right
+                if(j < n - 1){
+                    return G.get(j) < S.get(j - 1) + G.get((j-1)/2); // scan[R[v]] = sum[L[v]] + scan[v]
                 }
                 else{
-                    return G.get(j) < A.get(j - n) + G.get(j/2);
+                    return G.get(j) < A.get(j - n) + G.get((j-1)/2);
                 }
             }
         };
     
+        // left child = 2*j + 1 (garg's 2*j)
+        // right child = 2*j + 2 (garg's 2*j + 1)
+        // parent = (j-1)/2
+        // using this logic even used to be left child. now odds are left child
+        // left child is just copy of parent
+        // right child is just copy of parent
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
             if(j == 0){
                 return 0;
             }
-            else if(j % 2 == 1){
-                return G.get(j/2);
+            else if(j % 2 == 1){ // left
+                return G.get((j-1)/2); // copy parent
             }
-            else{
-                if(j < n){
-                    return S.get(j - 1) + G.get(j/2);
+            else{ // right
+                if(j < n - 1){
+                    return S.get(j - 1) + G.get((j-1)/2); // scan[R[v]] = sum[L[v]] + scan[v]
                 }
                 else{
-                    return A.get(j - n) + G.get(j/2);
+                    return A.get(j - n) + G.get((j-1)/2);
                 }
             }
         };
 
         List<Integer> G = new ArrayList<Integer>();
 	    List<Process> P = new ArrayList<Process>();
-	    G.add(0);
         for(int i = 0; i < (2*n) - 1; i++){
             G.add(0);
             Process p = new Process(advance, isForbidden, G);
