@@ -20,6 +20,7 @@ public class Runner
 
         List<Integer> a = reduce(l);
         List<Integer> b = scan(l);
+        System.out.println("============== Parallel Prefix ===============");
         System.out.println("input: " + l);
         System.out.println("reduce: " + a);
         System.out.println("scan: " + b);
@@ -38,6 +39,33 @@ public class Runner
         System.out.println("================== Bellman ===================");
         List<Integer> c = bellman_ford(W);
         for(List<Integer> t: W) {
+            System.out.println(t);
+        }
+        System.out.println();
+        System.out.println(c);
+
+        List<List<Integer>> W2 = new ArrayList<List<Integer>>();
+        int[][] test_case ={
+                {-1, 2, 3, 3, -1, -1, -1},
+                {2, -1, 4, -1, 3, -1, -1},
+                {3, 4, -1, 5, 1, 6, -1},
+                {3, -1, 5, -1, -1, 7, -1},
+                {-1, 3, 1, -1, -1, 8, -1},
+                {-1, -1, 6, 7, 8, -1, 8},
+                {-1, -1, -1, -1, -1, 8, -1}
+        };
+        for(int i = 0; i < 7; i++){
+            List<Integer> w = new ArrayList<Integer>();
+            for(int j = 0; j < 7; j++){
+                w.add(test_case[i][j]);
+            }
+            W2.add(w);
+        }
+
+        Process.resetTID();
+        System.out.println("=================== Prim's ====================");
+        List<Integer> d = prims(W2);
+        for(List<Integer> t: W2) {
             System.out.println(t);
         }
         System.out.println();
@@ -65,6 +93,7 @@ public class Runner
         // 4 -> 2, 3
         // 5 -> 4, 5
         // 6 -> 6, 7
+
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
             if(j < ((n/2) - 1)){
                 try {
@@ -293,6 +322,84 @@ public class Runner
         Process.resetTID();
         return G;
     }
+
+    public static List<Integer> prims(List<List<Integer>> W){
+        // W is an adjacency list of weights from the original vertex to vertex[index]
+        // Create a thread for each vertex.
+
+        // Begin with our var: arr[1...n], where the index is the originating vertex and the value is the vertex the chosen edge points to.
+        // At the end, every vertex should be present in this list
+        int n = W.size();
+        Process.resetTID();
+
+        // Start output at all max values. Initially all forbidden as there must exist some edge that's not Int MAX VALUE
+        List<Integer> output = new ArrayList<Integer>();
+        for(int i = 0; i < n; i++){
+            output.add(Integer.MAX_VALUE);
+        }
+        // isForbidden: Check to see if there is a lower weight edge possible in the graph. Do for every vertex
+        BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
+            for(int edge : W.get(j)){
+                if(edge != -1) {    // Edge exists
+                    return edge <= output.get(j);
+                }
+            }
+            return false;
+        };
+
+        // advance: Replace the current used edge with the lower weight edge if applicable
+        BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
+            int min_weight_edge = Integer.MAX_VALUE;
+            for(int edge : W.get(j)){
+                if(edge <= output.get(j)){
+                    min_weight_edge = edge;
+                }
+            }
+            return min_weight_edge;
+        };
+
+        List<Integer> G = new ArrayList<Integer>();
+        List<Process> P = new ArrayList<Process>();
+        for(int i = 0; i < n; i++){
+            G.add(Integer.MAX_VALUE);
+        }
+
+        for (int i = 0; i < n/8; i ++) {
+            Process p = new Process(advance, isForbidden, G, 8);
+            P.add(p);
+        }
+
+        for(Process p : P){
+            p.start();
+        }
+
+        while(true){
+            Boolean allNotForbidden = Boolean.TRUE;
+            for(Process p : P){
+                if(p.isForbidden()){
+                    allNotForbidden = Boolean.FALSE;
+                }
+            }
+            if(allNotForbidden){
+                break;
+            }
+        }
+
+        for(Process p : P){
+            p.finish();
+        }
+
+        for(Process p : P){
+            try{
+                p.join();
+            }
+            catch(InterruptedException e){
+                System.out.println("Horses Ass");
+            }
+        }
+        Process.resetTID();
+        return G;
+        }
 }
 
 
