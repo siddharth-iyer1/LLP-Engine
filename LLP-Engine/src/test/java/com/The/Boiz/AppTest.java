@@ -1,5 +1,9 @@
 package com.The.Boiz;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -33,6 +37,28 @@ public class AppTest
      */
     public void testApp()
     {
-        assertTrue( true );
+        testReduce();
+    }
+
+    public void testReduce() {
+        Random rand = new Random();
+        for (int n = (1 << 2); n <= (1 << 20); n *= 2) {
+            System.out.println("Reduce test size " + n);
+            List<Integer> l = new ArrayList<Integer>();
+            for(int i = 0; i < n; i++) {
+                l.add(i);
+            }
+            long sst = System.nanoTime();
+            Integer seq = SequentialSolver.seqReduce(l);
+            long set = System.nanoTime();
+
+            long pst = System.nanoTime();
+            List<Integer> a = Runner.reduce(l);
+            long pet = System.nanoTime();
+            System.out.println("sequ time: " + (set - sst) + "\n" +
+                               "para time: " + (pet - pst));
+            assertEquals("Reduce " + n, seq, a.get(0)); 
+
+        }
     }
 }

@@ -32,18 +32,13 @@ public class Process extends Thread{
         nextTID = 0;
     }
 
-    public void updateState(int thread, Integer newVal) {
-        System.out.println("recv " + newVal + " from thread " + thread);
-        globalState.set(thread, newVal);
-    }
-
     public Integer getProcessState() {
         return globalState.get(myTID);
     }
 
     public void run() {
         // while forbidden advance
-	System.out.println("Hello from thread: " + myTID + " -> " + Thread.currentThread().getId());
+	    // System.out.println("Hello from thread: " + myTID + " -> " + Thread.currentThread().getId());
         while(!done) { 
             if (forbidden.apply(myTID, globalState)) {
                 globalState.set(myTID, advance.apply(myTID, globalState));

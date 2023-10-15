@@ -19,7 +19,6 @@ public class Runner
         }
 
         List<Integer> a = reduce(l);
-        Process.resetTID();
         List<Integer> b = scan(l);
         System.out.println("input: " + l);
         System.out.println("reduce: " + a);
@@ -41,12 +40,14 @@ public class Runner
         for(List<Integer> t: W) {
             System.out.println(t);
         }
+        System.out.println();
         System.out.println(c);
     }
 
     public static List<Integer> reduce(List<Integer> A)
     {
         int n = A.size();
+        Process.resetTID();
 
         //    10
         //  3   7
@@ -66,19 +67,37 @@ public class Runner
         // 6 -> 6, 7
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
             if(j < ((n/2) - 1)){
-                return G.get(j) < G.get(2*j + 1) + G.get(2*j + 2);
+                try {
+                    return G.get(j) < Math.addExact(G.get(2*j + 1), G.get(2*j + 2));
+                } catch (ArithmeticException e) {
+                    return true;
+                }
             }
             else{
-                return G.get(j) < A.get((2*j) - n + 2) + A.get((2*j) - n + 3);
+                try {
+                    return G.get(j) < Math.addExact(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
+                } catch (ArithmeticException e) {
+                    e.printStackTrace();
+                    System.out.println(A.get((2*j) - n + 2) + " " + A.get((2*j) - n + 3));
+                    return true;
+                }
             }
         };
 
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
-            if(j < ((n/2) - 1)){
-                return G.get(2*j + 1) + G.get(2*j + 2);
+            if(j < ((n/2) - 1)) {
+                try {
+                    return Math.addExact(G.get(2*j + 1), G.get(2*j + 2));
+                } catch (ArithmeticException e) {
+                    return Math.min(G.get(2*j + 1), G.get(2*j + 2));
+                }
             }
-            else{
-                return A.get((2*j) - n + 2) + A.get((2*j) - n + 3);
+            else {
+                try {
+                    return Math.addExact(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
+                } catch (ArithmeticException e) {
+                    return Math.min(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
+                }
             }
         };
 
@@ -86,9 +105,9 @@ public class Runner
         List<Integer> G = new ArrayList<Integer>();
 	    List<Process> P = new ArrayList<Process>();
         for(int i = 0; i < n - 1; i++){
-            G.add(0);
+            G.add(Integer.MIN_VALUE);
             Process p = new Process(advance, isForbidden, G);
-	    P.add(p);
+	        P.add(p);
         }
 
         for(Process p : P){
@@ -102,7 +121,6 @@ public class Runner
                     allNotForbidden = Boolean.FALSE;
                 }
             }
-	        System.out.println(G);
             if(allNotForbidden){
                 break;
             }
@@ -120,6 +138,7 @@ public class Runner
                 System.out.println("Assballs");
             }
         }
+        Process.resetTID();
         return G;
     }
 
@@ -137,10 +156,18 @@ public class Runner
             }
             else{ // right
                 if(j < n - 1){
-                    return G.get(j) < S.get(j - 1) + G.get((j-1)/2); // scan[R[v]] = sum[L[v]] + scan[v]
+                    try {
+                        return G.get(j) < Math.addExact(S.get(j - 1), G.get((j-1)/2)); // scan[R[v]] = sum[L[v]] + scan[v]
+                    } catch (ArithmeticException e) {
+                        return true;
+                    }
                 }
                 else{
-                    return G.get(j) < A.get(j - n) + G.get((j-1)/2);
+                    try{
+                        return G.get(j) < Math.addExact(A.get(j - n), G.get((j-1)/2));
+                    } catch (ArithmeticException e) {
+                        return true;
+                    }
                 }
             }
         };
@@ -160,10 +187,18 @@ public class Runner
             }
             else{ // right
                 if(j < n - 1){
-                    return S.get(j - 1) + G.get((j-1)/2); // scan[R[v]] = sum[L[v]] + scan[v]
+                    try {
+                        return Math.addExact(S.get(j - 1), G.get((j-1)/2)); // scan[R[v]] = sum[L[v]] + scan[v]
+                    } catch (ArithmeticException e) {
+                        return Integer.MIN_VALUE;
+                    }
                 }
                 else{
-                    return A.get(j - n) + G.get((j-1)/2);
+                    try {
+                        return Math.addExact(A.get(j - n), G.get((j-1)/2));
+                    } catch (ArithmeticException e) {
+                        return Integer.MIN_VALUE;
+                    }
                 }
             }
         };
@@ -171,7 +206,7 @@ public class Runner
         List<Integer> G = new ArrayList<Integer>();
 	    List<Process> P = new ArrayList<Process>();
         for(int i = 0; i < (2*n) - 1; i++){
-            G.add(0);
+            G.add(Integer.MIN_VALUE);
             Process p = new Process(advance, isForbidden, G);
 	        P.add(p);
         }
@@ -186,7 +221,6 @@ public class Runner
                     allNotForbidden = Boolean.FALSE;
                 }
             }
-	    System.out.println(G);
             if(allNotForbidden){
                 break;
             }
@@ -204,11 +238,13 @@ public class Runner
                 System.out.println("Assballs");
             }
         }
+        Process.resetTID();
         return G;
     }
 
     public static List<Integer> bellman_ford(List<List<Integer>> W){
         int n = W.size();
+        Process.resetTID();
 
         BiFunction<Integer, List<List<Integer>>, List<Integer>> pre = (j, Graph) -> {
             List<Integer> ret = new ArrayList<Integer>();
@@ -258,7 +294,6 @@ public class Runner
                     allNotForbidden = Boolean.FALSE;
                 }
             }
-	    System.out.println(G);
             if(allNotForbidden){
                 break;
             }
@@ -276,6 +311,7 @@ public class Runner
                 System.out.println("Horses Ass");
             }
         }
+        Process.resetTID();
         return G;
     }
 }
