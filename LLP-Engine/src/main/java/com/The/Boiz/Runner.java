@@ -18,8 +18,8 @@ public class Runner
             l.add(i);
         }
 
-        List<Integer> a = reduce(l);
-        List<Integer> b = scan(l);
+        List<Integer> a = reduce(l, 8);
+        List<Integer> b = scan(l, 8);
         System.out.println("============== Parallel Prefix ===============");
         System.out.println("input: " + l);
         System.out.println("reduce: " + a);
@@ -37,7 +37,7 @@ public class Runner
         }
         Process.resetTID();
         System.out.println("================== Bellman ===================");
-        List<Integer> c = bellman_ford(W);
+        List<Integer> c = bellman_ford(W, 8);
         for(List<Integer> t: W) {
             System.out.println(t);
         }
@@ -72,7 +72,7 @@ public class Runner
         System.out.println(c);
     }
 
-    public static List<Integer> reduce(List<Integer> A)
+    public static List<Integer> reduce(List<Integer> A, int procs)
     {
         int n = A.size();
         Process.resetTID();
@@ -136,7 +136,7 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 16);
+        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpRunner.run();
 
         System.out.println("Reduce LLP time: " + llpRunner.GetRuntime() + " ns");
@@ -144,8 +144,8 @@ public class Runner
         return llpRunner.GetGlobalState();
     }
 
-    public static List<Integer> scan(List<Integer> A){
-        List<Integer> S = reduce(A);
+    public static List<Integer> scan(List<Integer> A, int procs){
+        List<Integer> S = reduce(A, procs);
         Process.resetTID();
         int n = A.size();
 
@@ -210,7 +210,7 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 16);
+        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpRunner.run();
 
         System.out.println("Scan LLP time  : " + llpRunner.GetRuntime() + " ns");
@@ -218,7 +218,7 @@ public class Runner
         return llpRunner.GetGlobalState();
     }
 
-    public static List<Integer> bellman_ford(List<List<Integer>> W){
+    public static List<Integer> bellman_ford(List<List<Integer>> W, int procs){
         int n = W.size();
         Process.resetTID();
 
@@ -258,10 +258,10 @@ public class Runner
                 G.add(Integer.MAX_VALUE);
         }
 
-        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 16);
+        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpRunner.run();
 
-        System.out.println("BellF LLP time  : " + llpRunner.GetRuntime() + " ns");
+        System.out.println("BellF LLP time : " + llpRunner.GetRuntime() + " ns");
 
         return llpRunner.GetGlobalState();    }
 

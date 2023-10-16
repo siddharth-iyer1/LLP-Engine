@@ -49,7 +49,12 @@ public class SequentialSolver
 
         for(int v = 0; v < W.size(); v++) {
             for (Integer u: pre.apply(v, W)) {
-                int temp = d.get(v) + W.get(v).get(u);
+                int temp;
+                try {
+                    temp = Math.addExact(d.get(u), W.get(u).get(v));
+                } catch (ArithmeticException e) {
+                    temp = Integer.MAX_VALUE;
+                }
                 if(d.get(v) > temp) {
                     d.set(v, temp);
                 }

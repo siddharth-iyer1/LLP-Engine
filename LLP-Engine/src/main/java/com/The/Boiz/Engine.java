@@ -31,7 +31,7 @@ public class Engine {
         this.adv = adv;
         int procs_per_thread = (int)Math.ceil(globalState.size() / (double) totalProcs);
 
-        for(int i = 0; i < totalProcs; i++){
+        for(int i = 0; i < totalProcs+1; i++){
             allProcs.add(new Process(adv, B, globalState, procs_per_thread));
         }
         Process.resetTID();

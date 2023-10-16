@@ -32,54 +32,69 @@ public class AppTest
         return new TestSuite( AppTest.class );
     }
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        testReduce();
-    }
-
     public void testReduce() {
+        System.out.println("========= REDUCE TEST =========");
         Random rand = new Random();
-        for (int n = (1 << 4); n <= (1 << 14); n *= 2) {
-            System.out.println("Reduce test size " + n);
-            List<Integer> l = new ArrayList<Integer>();
-            for(int i = 0; i < n; i++) {
-                l.add(i % 128);
-            }
-            List<Integer> a = Runner.reduce(l);
-
-            long sst = System.nanoTime();
-            Integer seq = SequentialSolver.seqReduce(l);
-            long set = System.nanoTime();
-
-            System.out.println("sequ time      : " + (set - sst) + " ns");
-            assertEquals("Reduce " + n, seq, a.get(0)); 
-
+        int n = 1 << 15;
+        System.out.println("Reduce test size " + n);
+        List<Integer> l = new ArrayList<Integer>();
+        for(int i = 0; i < n; i++) {
+            l.add(i % 128);
         }
+        List<Integer> a = Runner.reduce(l, 8);
+
+        long sst = System.nanoTime();
+        Integer seq = SequentialSolver.seqReduce(l);
+        long set = System.nanoTime();
+
+        System.out.println("sequ time      : " + (set - sst) + " ns");
+        assertEquals("Reduce " + n, seq, a.get(0)); 
     }
 
     public void testScan() {
+        System.out.println("========= SCAN TEST =========");
         Random rand = new Random();
-        for (int n = (1 << 4); n <= (1 << 14); n *= 2) {
-            System.out.println("Scan test size " + n);
-            List<Integer> l = new ArrayList<Integer>();
-            for(int i = 0; i < n; i++) {
-                l.add(i % 128);
-            }
-            List<Integer> a = Runner.scan(l);
-
-            long sst = System.nanoTime();
-            List<Integer> seq = SequentialSolver.seqScan(l);
-            long set = System.nanoTime();
-
-            System.out.println("sequ time      : " + (set - sst) + " ns");
-            for(int i = 0; i < seq.size(); i++) {
-                assertEquals("Scan \nExpected:" + seq + "\nActual  :" + a, seq.get(i), a.get(i+n-1)); 
-            }
-
+        int n = 1 << 15;
+        System.out.println("Scan test size " + n);
+        List<Integer> l = new ArrayList<Integer>();
+        for(int i = 0; i < n; i++) {
+            l.add(i % 128);
         }
+        List<Integer> a = Runner.scan(l, 8);
+
+        long sst = System.nanoTime();
+        List<Integer> seq = SequentialSolver.seqScan(l);
+        long set = System.nanoTime();
+
+        System.out.println("sequ time      : " + (set - sst) + " ns");
+        assertEquals("Scan", seq, a.subList(n-1, 2*n-1)); 
+    }
+
+    public void testBelmanFord() {
+        System.out.println("========= BELLMAN FORD TEST =========");
+        Random rand = new Random();
+        int n = 1 << 12;
+        System.out.println("Bellman ford test size " + n);
+        List<List<Integer>> l = new ArrayList<List<Integer>>();
+        for(int i = 0; i < n; i++) {
+            l.add(new ArrayList<Integer>());
+            for(int j = 0; j < n; j++){
+                if(j == i + 1) {
+                    l.get(i).add(1);
+                }
+                else {
+                    l.get(i).add(0);
+                }
+            }
+        }
+        List<Integer> a = Runner.bellman_ford(l, 8);
+
+        long sst = System.nanoTime();
+        List<Integer> seq = SequentialSolver.seqBellmanFord(l);
+        long set = System.nanoTime();
+
+        System.out.println("sequ time      : " + (set - sst) + " ns");
+        assertEquals("Bellman Ford", seq, a); 
     }
 
 }
