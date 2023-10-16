@@ -211,8 +211,8 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        for(int i = 0; i < ((2*n) - 1) / 8; i++){
-            Process p = new Process(advance, isForbidden, G, 8);
+        for(int i = 0; i < ((2*n) - 1); i++){
+            Process p = new Process(advance, isForbidden, G, 1);
             P.add(p);
         }
 
@@ -287,8 +287,8 @@ public class Runner
             else
                 G.add(Integer.MAX_VALUE);
         }
-        for (int i = 0; i < n/8; i ++) {
-            Process p = new Process(advance, isForbidden, G, 8);
+        for (int i = 0; i < n; i ++) {
+            Process p = new Process(advance, isForbidden, G, 1);
 	        P.add(p);
         }
         for(Process p : P){

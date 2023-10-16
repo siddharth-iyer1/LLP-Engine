@@ -26,7 +26,7 @@ public class Process extends Thread{
         for(int i = 0; i < procs_per_thread; i++) {
             int localProcNum = myTID*procs_per_thread + i;
 	        if (localProcNum < globalState.size() && forbidden.apply(localProcNum, globalState)) {
-                return true;
+		    return true;
             }
         }
         return false;
