@@ -8,7 +8,7 @@ public class Process<T> extends Thread {
     private static int nextTID = 0;
     private int myTID;
     private Boolean done;
-    private List<T> globalState;
+    private volatile List<T> globalState;
     private BiFunction<Integer, List<T>, T> advance;
     private BiFunction<Integer, List<T>, Boolean> forbidden;
     private int procs_per_thread;
