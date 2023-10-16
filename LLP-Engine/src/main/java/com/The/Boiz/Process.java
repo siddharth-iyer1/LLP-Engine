@@ -3,17 +3,17 @@ package com.The.Boiz;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class Process extends Thread{
+public class Process<T> extends Thread {
 
     private static int nextTID = 0;
     private int myTID;
     private Boolean done;
-    private List<Integer> globalState;
-    private BiFunction<Integer, List<Integer>, Integer> advance;
-    private BiFunction<Integer, List<Integer>, Boolean> forbidden;
+    private List<T> globalState;
+    private BiFunction<Integer, List<T>, T> advance;
+    private BiFunction<Integer, List<T>, Boolean> forbidden;
     private int procs_per_thread;
 
-    public Process(BiFunction<Integer, List<Integer>, Integer> alpha, BiFunction<Integer, List<Integer>, Boolean> B, List<Integer> globalState, int num_procs) {
+    public Process(BiFunction<Integer, List<T>, T> alpha, BiFunction<Integer, List<T>, Boolean> B, List<T> globalState, int num_procs) {
         this.globalState = globalState; // reference
         this.forbidden = B;
         this.advance = alpha;
@@ -40,7 +40,7 @@ public class Process extends Thread{
         nextTID = 0;
     }
 
-    public Integer getProcessState() {
+    public T getProcessState() {
         return globalState.get(myTID);
     }
 

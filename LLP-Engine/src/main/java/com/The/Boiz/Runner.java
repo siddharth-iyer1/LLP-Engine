@@ -1,6 +1,8 @@
 package com.The.Boiz;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -64,7 +66,7 @@ public class Runner
 
         Process.resetTID();
         System.out.println("=================== Prim's ====================");
-        List<Integer> d = prims(W2);
+        List<Integer> d = prims(W2, 8);
         for(List<Integer> t: W2) {
             System.out.println(t);
         }
@@ -136,7 +138,7 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpRunner.run();
 
         System.out.println("Reduce LLP time: " + llpRunner.GetRuntime() + " ns");
@@ -210,7 +212,7 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpRunner.run();
 
         System.out.println("Scan LLP time  : " + llpRunner.GetRuntime() + " ns");
@@ -250,7 +252,6 @@ public class Runner
         };
 
         List<Integer> G = new ArrayList<Integer>();
-	    List<Process> P = new ArrayList<Process>();
         for(int i = 0; i < n; i++){
             if(i == 0) 
                 G.add(0);
@@ -258,14 +259,14 @@ public class Runner
                 G.add(Integer.MAX_VALUE);
         }
 
-        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpRunner.run();
 
         System.out.println("BellF LLP time : " + llpRunner.GetRuntime() + " ns");
 
         return llpRunner.GetGlobalState();    }
 
-    public static List<Integer> prims(List<List<Integer>> W){
+    public static List<Integer> prims(List<List<Integer>> W, int procs){
         // W is an adjacency list of weights from the original vertex to vertex[index]
         // Create a thread for each vertex.
 
@@ -301,47 +302,81 @@ public class Runner
         };
 
         List<Integer> G = new ArrayList<Integer>();
-        List<Process> P = new ArrayList<Process>();
         for(int i = 0; i < n; i++){
             G.add(Integer.MAX_VALUE);
         }
+        
+        Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        llpEngine.run();
 
-        for (int i = 0; i < n/8; i ++) {
-            Process p = new Process(advance, isForbidden, G, 8);
-            P.add(p);
-        }
+        return G;
+    }
 
-        for(Process p : P){
-            p.start();
-        }
+    public static List<Double> OBST(List<Double> probs, int procs) {
+        // input: probs, frequency of each symbol
+        // init G[i, j] = 0; G[i, i] = probs[i]
+        // always s(i,j) = sum probs from i to j
+        // ensure: G[i, j] >= min {G[i,k-1] + s(i,j) + G[k+1, j]} where k is in range [i, j)
+        // priority: (j - i) ?????? seems like a scheduling opt
+        // https://dl.acm.org/doi/pdf/10.1145/3491003.3491019 gargs is goated.
 
-        while(true){
-            Boolean allNotForbidden = Boolean.TRUE;
-            for(Process p : P){
-                if(p.isForbidden()){
-                    allNotForbidden = Boolean.FALSE;
+        // init global state
+        int numEles = probs.size();
+
+        List<Double> G = new ArrayList<Double>();
+        for(int i = 0; i < numEles; i++) {
+            for(int j = 0; j < numEles; j++) {
+                if(i == j) {
+                    G.add(probs.get(i));
+                }
+                else {
+                    G.add(0.0);
                 }
             }
-            if(allNotForbidden){
-                break;
-            }
         }
 
-        for(Process p : P){
-            p.finish();
-        }
+        BiFunction<Integer, Integer, Double> s = (i, j) -> {
+            Double ret = 0.0;
+            for(int k = i; k <= j; k++) {
+                ret += probs.get(k);
+            }
+            return ret;
+        };
 
-        for(Process p : P){
-            try{
-                p.join();
+        BiFunction<Integer, List<Double>, Boolean> isForbidden = (tid, globalState) -> {
+            ArrayList<Double> temp = new ArrayList<Double>();
+            int n = globalState.size();
+            int i = tid / n;
+            int j = tid % n;
+            for(int k = i; i < j; i++) {
+                temp.add(globalState.get(i * n + k-1) + 
+                         s.apply(i, j) + 
+                         globalState.get((k+1) * n + j));
             }
-            catch(InterruptedException e){
-                System.out.println("Horses Ass");
+            Double min = Collections.min(temp);
+            return globalState.get(i * n + j) < min;
+        };
+
+        BiFunction<Integer, List<Double>, Double> advance = (tid, globalState) -> {
+            ArrayList<Double> temp = new ArrayList<Double>();
+            int n = globalState.size();
+            int i = tid / n;
+            int j = tid % n;
+            for(int k = i; i < j; i++) {
+                temp.add(globalState.get(i * n + k-1) + 
+                         s.apply(i, j) + 
+                         globalState.get((k+1) * n + j));
             }
-        }
-        Process.resetTID();
+            Double min = Collections.min(temp);
+            return min;
+        };
+
+        Engine<Double> llpEngine = new Engine<Double>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        llpEngine.run();
+
         return G;
-        }
+    }
+
 }
 
 

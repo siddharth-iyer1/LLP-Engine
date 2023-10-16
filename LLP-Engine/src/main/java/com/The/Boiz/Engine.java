@@ -6,33 +6,33 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Engine {
+public class Engine<T> {
     
-    private List<Process> allProcs;
+    private List<Process<T>> allProcs;
     private int totalProcs;
-    BiFunction<Integer, List<Integer>, Boolean> B;
-    BiFunction<Integer, List<Integer>, Integer> adv;
+    BiFunction<Integer, List<T>, Boolean> B;
+    BiFunction<Integer, List<T>, T> adv;
     Function<List<Boolean>, Boolean> isDone;
-    List<Integer> globalState;
+    List<T> globalState;
     long startTime;
     long endTime;
 
 
-    public Engine(BiFunction<Integer, List<Integer>, Integer> adv,
-                  BiFunction<Integer, List<Integer>, Boolean> B,
+    public Engine(BiFunction<Integer, List<T>, T> adv,
+                  BiFunction<Integer, List<T>, Boolean> B,
                   Function<List<Boolean>, Boolean> isDone,
-                  List<Integer> globalState, int totalProcs) {
+                  List<T> globalState, int totalProcs) {
         
         this.totalProcs = totalProcs;
         this.globalState = globalState;
-        this.allProcs = new ArrayList<Process>();
+        this.allProcs = new ArrayList<Process<T>>();
         this.isDone = isDone;
         this.B = B;
         this.adv = adv;
         int procs_per_thread = (int)Math.ceil(globalState.size() / (double) totalProcs);
 
         for(int i = 0; i < totalProcs+1; i++){
-            allProcs.add(new Process(adv, B, globalState, procs_per_thread));
+            allProcs.add(new Process<T>(adv, B, globalState, procs_per_thread));
         }
         Process.resetTID();
         System.out.println("Launching LLP job with " + 
@@ -42,7 +42,7 @@ public class Engine {
                            " Processes per thread.");
     }
 
-    public List<Integer> GetGlobalState() {
+    public List<T> GetGlobalState() {
         return globalState;
     }
 
@@ -52,7 +52,7 @@ public class Engine {
 
 
     public void run() {
-        for(Process p: allProcs) {
+        for(Process<T> p: allProcs) {
             p.start();
         }
         this.startTime = System.nanoTime();
@@ -62,7 +62,7 @@ public class Engine {
             }
         }
         this.endTime = System.nanoTime();
-        for(Process p: allProcs) {
+        for(Process<T> p: allProcs) {
             p.finish();
             try{
                 p.join();
