@@ -42,20 +42,44 @@ public class AppTest
 
     public void testReduce() {
         Random rand = new Random();
-        for (int n = (1 << 4); n <= (1 << 20); n *= 2) {
+        for (int n = (1 << 4); n <= (1 << 14); n *= 2) {
             System.out.println("Reduce test size " + n);
             List<Integer> l = new ArrayList<Integer>();
             for(int i = 0; i < n; i++) {
-                l.add(i);
+                l.add(i % 128);
             }
+            List<Integer> a = Runner.reduce(l);
+
             long sst = System.nanoTime();
             Integer seq = SequentialSolver.seqReduce(l);
             long set = System.nanoTime();
 
-            List<Integer> a = Runner.reduce(l);
-            System.out.println("sequ time: " + (set - sst) + "ns");
+            System.out.println("sequ time      : " + (set - sst) + " ns");
             assertEquals("Reduce " + n, seq, a.get(0)); 
 
         }
     }
+
+    public void testScan() {
+        Random rand = new Random();
+        for (int n = (1 << 4); n <= (1 << 14); n *= 2) {
+            System.out.println("Scan test size " + n);
+            List<Integer> l = new ArrayList<Integer>();
+            for(int i = 0; i < n; i++) {
+                l.add(i % 128);
+            }
+            List<Integer> a = Runner.scan(l);
+
+            long sst = System.nanoTime();
+            List<Integer> seq = SequentialSolver.seqScan(l);
+            long set = System.nanoTime();
+
+            System.out.println("sequ time      : " + (set - sst) + " ns");
+            for(int i = 0; i < seq.size(); i++) {
+                assertEquals("Scan \nExpected:" + seq + "\nActual  :" + a, seq.get(i), a.get(i+n-1)); 
+            }
+
+        }
+    }
+
 }

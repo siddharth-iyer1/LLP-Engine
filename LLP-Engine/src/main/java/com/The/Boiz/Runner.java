@@ -136,10 +136,10 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 8);
+        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 16);
         llpRunner.run();
 
-        System.out.println("Reduce LLP time: " + llpRunner.GetRuntime() + "ns");
+        System.out.println("Reduce LLP time: " + llpRunner.GetRuntime() + " ns");
 
         return llpRunner.GetGlobalState();
     }
@@ -206,46 +206,16 @@ public class Runner
         };
 
         List<Integer> G = new ArrayList<Integer>();
-	    List<Process> P = new ArrayList<Process>();
         for(int i = 0; i < (2*n) - 1; i++){
             G.add(Integer.MIN_VALUE);
         }
 
-        for(int i = 0; i < ((2*n) - 1); i++){
-            Process p = new Process(advance, isForbidden, G, 1);
-            P.add(p);
-        }
+        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 16);
+        llpRunner.run();
 
-        for(Process p : P){
-            p.start();
-        }
+        System.out.println("Scan LLP time  : " + llpRunner.GetRuntime() + " ns");
 
-        while(true){
-            Boolean allNotForbidden = Boolean.TRUE;
-            for(Process p : P){
-                if(p.isForbidden()){
-                    allNotForbidden = Boolean.FALSE;
-                }
-            }
-            if(allNotForbidden){
-                break;
-            }
-        }
-
-        for(Process p : P){
-            p.finish();
-        }
-
-        for(Process p : P){
-            try{
-                p.join();
-            }
-            catch(InterruptedException e){
-                System.out.println("Assballs");
-            }
-        }
-        Process.resetTID();
-        return G;
+        return llpRunner.GetGlobalState();
     }
 
     public static List<Integer> bellman_ford(List<List<Integer>> W){
@@ -287,41 +257,13 @@ public class Runner
             else
                 G.add(Integer.MAX_VALUE);
         }
-        for (int i = 0; i < n; i ++) {
-            Process p = new Process(advance, isForbidden, G, 1);
-	        P.add(p);
-        }
-        for(Process p : P){
-            p.start();
-        }
 
-        while(true){
-            Boolean allNotForbidden = Boolean.TRUE;
-            for(Process p : P){
-                if(p.isForbidden()){
-                    allNotForbidden = Boolean.FALSE;
-                }
-            }
-            if(allNotForbidden){
-                break;
-            }
-        }
+        Engine llpRunner = new Engine(advance, isForbidden, (e) -> { return !e.contains(true);}, G, 16);
+        llpRunner.run();
 
-        for(Process p : P){
-            p.finish();
-        }
+        System.out.println("BellF LLP time  : " + llpRunner.GetRuntime() + " ns");
 
-        for(Process p : P){
-            try{
-                p.join();
-            }
-            catch(InterruptedException e){
-                System.out.println("Horses Ass");
-            }
-        }
-        Process.resetTID();
-        return G;
-    }
+        return llpRunner.GetGlobalState();    }
 
     public static List<Integer> prims(List<List<Integer>> W){
         // W is an adjacency list of weights from the original vertex to vertex[index]

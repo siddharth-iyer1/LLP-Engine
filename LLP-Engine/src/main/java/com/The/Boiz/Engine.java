@@ -9,7 +9,7 @@ import java.util.List;
 public class Engine {
     
     private List<Process> allProcs;
-    private int procs_per_thread;
+    private int totalProcs;
     BiFunction<Integer, List<Integer>, Boolean> B;
     BiFunction<Integer, List<Integer>, Integer> adv;
     Function<List<Boolean>, Boolean> isDone;
@@ -21,23 +21,23 @@ public class Engine {
     public Engine(BiFunction<Integer, List<Integer>, Integer> adv,
                   BiFunction<Integer, List<Integer>, Boolean> B,
                   Function<List<Boolean>, Boolean> isDone,
-                  List<Integer> globalState, int procs_per_thread) {
+                  List<Integer> globalState, int totalProcs) {
         
-        this.procs_per_thread = procs_per_thread;
+        this.totalProcs = totalProcs;
         this.globalState = globalState;
         this.allProcs = new ArrayList<Process>();
         this.isDone = isDone;
         this.B = B;
         this.adv = adv;
-        int num_threads = (int)Math.ceil(globalState.size() / (double) procs_per_thread);
+        int procs_per_thread = (int)Math.ceil(globalState.size() / (double) totalProcs);
 
-        for(int i = 0; i < num_threads; i++){
+        for(int i = 0; i < totalProcs; i++){
             allProcs.add(new Process(adv, B, globalState, procs_per_thread));
         }
         Process.resetTID();
         System.out.println("Launching LLP job with " + 
-                           num_threads +
-                           " Threads and " +
+                           totalProcs +
+                           " Processors and " +
                            procs_per_thread +
                            " Processes per thread.");
     }
