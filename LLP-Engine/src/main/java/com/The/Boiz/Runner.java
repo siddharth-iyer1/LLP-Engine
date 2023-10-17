@@ -1,9 +1,7 @@
 package com.The.Boiz;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.sql.Array;
+import java.util.*;
 import java.util.function.BiFunction;
 
 /**
@@ -267,44 +265,96 @@ public class Runner
         return llpRunner.GetGlobalState();    }
 
     public static List<Integer> prims(List<List<Integer>> W, int procs){
-        // W is an adjacency list of weights from the original vertex to vertex[index]
-        // Create a thread for each vertex.
 
-        // Begin with our var: arr[1...n], where the index is the originating vertex and the value is the vertex the chosen edge points to.
-        // At the end, every vertex should be present in this list
+//        var G: array[1..n-1] of real; Initially all i : G[i] = minimum edge adjacent to i;
+//        always
+//          fixed(j, G) means there exists a directed path from vj to v0 using edges in G
+//          E' := { (i, k) in E | fixed(i, G) ^ ¬fixed(k, G)};
+//          forbidden (j) means There exists some i : (i, j) in E' such that it has minimum weight w[i, j] of all edges in E 0
+//        advance(j) G[j] := min{w[i, j] | (i, j) 2 E 0 }
+
+//        We define a vertex to be fixed if by traversing the path starting from the edge proposed by
+//        that vertex leads to v 0
+
+        // In this implementation, we're going to have the indices (i) of our Global state contain the
+        // Node who is pointing to Node i
+
+        // Meaning G[i] = j, means (j, i) is a part of the Edge Set
+        // j -> i for clarification
+
         int n = W.size();
+        int v0 = 0;     // Arbitrarily set the initial vertex to the 0th vertex
+        HashMap<Integer, Integer> e_prime = new HashMap<Integer, Integer>();
         Process.resetTID();
 
-        // Start output at all max values. Initially all forbidden as there must exist some edge that's not Int MAX VALUE
-        List<Integer> output = new ArrayList<Integer>();
-        for(int i = 0; i < n; i++){
-            output.add(Integer.MAX_VALUE);
-        }
-        // isForbidden: Check to see if there is a lower weight edge possible in the graph. Do for every vertex
-        BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-            for(int edge : W.get(j)){
-                if(edge != -1) {    // Edge exists
-                    return edge <= output.get(j);
+        BiFunction<Integer, List<Integer>, Boolean> isFixed = (j, G) -> {
+            int initial_vertex = j;
+            int curr_node = j;
+            for(int i = 0; i < n; i++){     // If we go through this n times and don't find v0, it can't be fixed
+                curr_node = G.get(curr_node);
+                if(curr_node == v0){
+                    return true;
                 }
             }
             return false;
         };
 
-        // advance: Replace the current used edge with the lower weight edge if applicable
-        BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
-            int min_weight_edge = Integer.MAX_VALUE;
-            for(int edge : W.get(j)){
-                if(edge <= output.get(j)){
-                    min_weight_edge = edge;
-                }
+        BiFunction<Integer, List<Integer>, Boolean> isE_Prime = (j, G) -> {
+            if(W.get(j).get(G.get(j)) == -1){   // If our Global State has index j pointed to by a null, not in E
+                return false;
             }
-            return min_weight_edge;
+            else{
+                Boolean condition1 = isFixed.apply(G.get(j), G);
+                Boolean condition2 = !isFixed.apply(j, G);
+
+                e_prime.put(G.get(j), j);
+                return condition1 && condition2;
+            }
         };
 
+        BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
+            if(isE_Prime.apply(j, G)){
+                int min_weight = W.get(j).get(G.get(j));
+                for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()) {
+                    // Don't compare j from E'
+                    if(!Objects.equals(entry.getValue(), j)) {
+                        if(W.get(j).get(G.get(j)) < min_weight){
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+
+        BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
+            int min_weight = W.get(j).get(G.get(j));
+            for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()){
+                // To be continued...
+            }
+            return 1;
+        };
+
+
+
+
+
+        // Setup Global State and run
+
         List<Integer> G = new ArrayList<Integer>();
+
         for(int i = 0; i < n; i++){
-            G.add(Integer.MAX_VALUE);
+            int min = Integer.MAX_VALUE;
+            int min_index = 0;
+            for(int j = 0; j < W.get(i).size(); j++){
+                if(W.get(i).get(j) <= min){
+                    min = W.get(i).get(j);
+                    min_index = j;
+                }
+            }
+            G.add(min_index);
         }
+
         
         Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpEngine.run();
