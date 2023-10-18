@@ -288,7 +288,6 @@ public class Runner
         Process.resetTID();
 
         BiFunction<Integer, List<Integer>, Boolean> isFixed = (j, G) -> {
-            int initial_vertex = j;
             int curr_node = j;
             for(int i = 0; i < n; i++){     // If we go through this n times and don't find v0, it can't be fixed
                 curr_node = G.get(curr_node);
@@ -307,32 +306,68 @@ public class Runner
                 Boolean condition1 = isFixed.apply(G.get(j), G);
                 Boolean condition2 = !isFixed.apply(j, G);
 
-                e_prime.put(G.get(j), j);
-                return condition1 && condition2;
+                if(condition1 && condition2){
+                    return true;
+                }
+                else{
+                    return false;
+                }
             }
         };
 
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
+            // If j is fixed, return false
+            // For all predecessors
+                // Check if predecessor has the minimum weight of all edges in E'
+                // If in E'
+
+            HashMap<Integer, Integer> local_e_prime = new HashMap<>();
+            for(int k : G){
+                if(isE_Prime.apply(k, G)){
+                    local_e_prime.put(G.get(k), k);
+                }
+            }
+
             if(isE_Prime.apply(j, G)){
-                int min_weight = W.get(j).get(G.get(j));
+                return false;
+            }
+            else{
+                int min = Integer.MAX_VALUE;
                 for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()) {
-                    // Don't compare j from E'
-                    if(!Objects.equals(entry.getValue(), j)) {
-                        if(W.get(j).get(G.get(j)) < min_weight){
-                            return false;
+                    int index = entry.getKey();
+                    int val = entry.getValue();
+                    if(W.get(index).get(val) <= min){
+                        min = W.get(index).get(val);
+                    }
+                }
+
+                for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()) {
+                    if(entry.getValue() == j){
+                        int index = entry.getKey();
+                        int val = entry.getValue();
+                        if(W.get(index).get(val) == min){
+                            return true;
                         }
                     }
                 }
             }
-            return true;
+            return false;
         };
 
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
-            int min_weight = W.get(j).get(G.get(j));
-            for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()){
-                // To be continued...
+            int min = Integer.MAX_VALUE;
+            int Gj = 0;
+            for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()) {
+                if(entry.getValue() == j){
+                    int index = entry.getKey();
+                    int val = entry.getValue();
+                    if(W.get(index).get(val) <= min){
+                        min = W.get(index).get(val);
+                        Gj = index;
+                    }
+                }
             }
-            return 1;
+            return Gj;
         };
 
 
