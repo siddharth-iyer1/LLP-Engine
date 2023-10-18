@@ -4,7 +4,6 @@ import java.sql.Array;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.HashMap;
 
 /**
  * Hello world!
@@ -47,18 +46,10 @@ public class Runner
         System.out.println(c);
 
         List<List<Integer>> W2 = new ArrayList<List<Integer>>();
-        int[][] test_case ={
-                {-1, 2, 3, 3, -1, -1, -1},
-                {2, -1, 4, -1, 3, -1, -1},
-                {3, 4, -1, 5, 1, 6, -1},
-                {3, -1, 5, -1, -1, 7, -1},
-                {-1, 3, 1, -1, -1, 8, -1},
-                {-1, -1, 6, 7, 8, -1, 8},
-                {-1, -1, -1, -1, -1, 8, -1}
-        };
-        for(int i = 0; i < 7; i++){
+        int[][] test_case ={{-1, 8, 9}, {8, -1, 10}, {9, 10, -1}};
+        for(int i = 0; i < 3; i++){
             List<Integer> w = new ArrayList<Integer>();
-            for(int j = 0; j < 7; j++){
+            for(int j = 0; j < 3; j++){
                 w.add(test_case[i][j]);
             }
             W2.add(w);
@@ -71,7 +62,7 @@ public class Runner
             System.out.println(t);
         }
         System.out.println();
-        System.out.println(c);
+        System.out.println(d);
     }
 
     public static List<Integer> reduce(List<Integer> A, int procs)
