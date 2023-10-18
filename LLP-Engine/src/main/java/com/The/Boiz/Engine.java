@@ -5,6 +5,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Engine<T> {
     
@@ -14,6 +16,7 @@ public class Engine<T> {
     BiFunction<Integer, List<T>, T> adv;
     Function<List<Boolean>, Boolean> isDone;
     List<T> globalState;
+    ArrayList<Mailbox> mons;
     long startTime;
     long endTime;
 
@@ -21,7 +24,8 @@ public class Engine<T> {
     public Engine(BiFunction<Integer, List<T>, T> adv,
                   BiFunction<Integer, List<T>, Boolean> B,
                   Function<List<Boolean>, Boolean> isDone,
-                  List<T> globalState, int totalProcs) {
+                  List<T> globalState, int totalProcs,
+		  Function<Integer, List<Integer>> cons) {
         
         this.totalProcs = totalProcs;
         this.globalState = globalState;
@@ -29,10 +33,20 @@ public class Engine<T> {
         this.isDone = isDone;
         this.B = B;
         this.adv = adv;
-        int procs_per_thread = (int)Math.ceil(globalState.size() / (double) totalProcs);
+        int procs_per_thread = Math.max((int)Math.ceil(globalState.size() / (double) totalProcs), 1);
+	this.mons = new ArrayList<Mailbox>();
+	Map<Integer, List<Integer>> prods = new HashMap<Integer, List<Integer>>();
+
+	for(int i = 0; i < globalState.size(); i++) {
+	    for(Integer temp: cons.apply(i)) {
+		prods.computeIfAbsent(temp, (e) -> new ArrayList<Integer>()).add(i);
+	    }
+	}
+	// System.out.println(prods);
 
         for(int i = 0; i < totalProcs+1; i++){
-            allProcs.add(new Process<T>(adv, B, globalState, procs_per_thread));
+            allProcs.add(new Process<T>(adv, B, globalState, procs_per_thread, mons, prods));
+	    mons.add(new Mailbox());
         }
         Process.resetTID();
         System.out.println("Launching LLP job with " + 
@@ -60,11 +74,13 @@ public class Engine<T> {
             if(isDone.apply(allProcs.stream().map(e -> e.isForbidden()).collect(Collectors.toList()))) {
                 break;
             }
+	    System.out.println(globalState);
         }
         this.endTime = System.nanoTime();
         for(Process<T> p: allProcs) {
             p.finish();
             try{
+		p.interrupt();
                 p.join();
             } catch(InterruptedException e){
                 System.out.println("Main thread interrupted while trying to join...");

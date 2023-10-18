@@ -35,13 +35,14 @@ public class AppTest
     public void testReduce() {
         System.out.println("========= REDUCE TEST =========");
         Random rand = new Random();
-        int n = 1 << 15;
+        int n = 1 << 10;
+	int procs = 1 << 13;
         System.out.println("Reduce test size " + n);
         List<Integer> l = new ArrayList<Integer>();
         for(int i = 0; i < n; i++) {
-            l.add(i % 128);
+            l.add(128);
         }
-        List<Integer> a = Runner.reduce(l, 8);
+        List<Integer> a = Runner.reduce(l, Math.min(procs, n));
 
         long sst = System.nanoTime();
         Integer seq = SequentialSolver.seqReduce(l);
@@ -54,13 +55,14 @@ public class AppTest
     public void testScan() {
         System.out.println("========= SCAN TEST =========");
         Random rand = new Random();
-        int n = 1 << 15;
+        int n = 1 << 10;
+	int procs = 1 << 13;
         System.out.println("Scan test size " + n);
         List<Integer> l = new ArrayList<Integer>();
         for(int i = 0; i < n; i++) {
             l.add(i % 128);
         }
-        List<Integer> a = Runner.scan(l, 8);
+        List<Integer> a = Runner.scan(l, Math.min(procs, n));
 
         long sst = System.nanoTime();
         List<Integer> seq = SequentialSolver.seqScan(l);
@@ -73,13 +75,14 @@ public class AppTest
     public void testBelmanFord() {
         System.out.println("========= BELLMAN FORD TEST =========");
         Random rand = new Random();
-        int n = 1 << 12;
+        int n = 1 << 10;
+	int procs = 1 << 13;
         System.out.println("Bellman ford test size " + n);
         List<List<Integer>> l = new ArrayList<List<Integer>>();
         for(int i = 0; i < n; i++) {
             l.add(new ArrayList<Integer>());
             for(int j = 0; j < n; j++){
-                if(j == i + 1) {
+                if(j == (i + 1)%n) {
                     l.get(i).add(1);
                 }
                 else {
@@ -87,7 +90,8 @@ public class AppTest
                 }
             }
         }
-        List<Integer> a = Runner.bellman_ford(l, 8);
+        List<Integer> a = Runner.bellman_ford(l, Math.min(procs, n));
+	System.out.println("LLP Done");
 
         long sst = System.nanoTime();
         List<Integer> seq = SequentialSolver.seqBellmanFord(l);
