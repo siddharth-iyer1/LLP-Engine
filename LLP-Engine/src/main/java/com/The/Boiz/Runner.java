@@ -3,6 +3,8 @@ package com.The.Boiz;
 import java.sql.Array;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.HashMap;
 
 /**
  * Hello world!
@@ -118,16 +120,26 @@ public class Runner
                 try {
                     return Math.addExact(G.get(2*j + 1), G.get(2*j + 2));
                 } catch (ArithmeticException e) {
-                    return Math.min(G.get(2*j + 1), G.get(2*j + 2));
+                    return Math.max(G.get(2*j + 1), G.get(2*j + 2));
                 }
             }
             else {
                 try {
                     return Math.addExact(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
                 } catch (ArithmeticException e) {
-                    return Math.min(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
+		    System.out.println("Fok2");
+                    return Math.max(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
                 }
             }
+        };
+
+	Function<Integer, List<Integer>> cons = (j) -> {
+	    ArrayList<Integer> ret = new ArrayList<Integer>();
+            if(j < ((n/2) - 1)) {
+		ret.add(2*j + 1);
+		ret.add(2*j + 2);
+            }
+	    return ret;
         };
 
         // Init Global State
@@ -136,7 +148,8 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
+							cons);
         llpRunner.run();
 
         System.out.println("Reduce LLP time: " + llpRunner.GetRuntime() + " ns");
@@ -171,6 +184,27 @@ public class Runner
                         return true;
                     }
                 }
+            }
+        };
+
+	Function<Integer, List<Integer>> consumes = (j) -> {
+	    ArrayList<Integer> ret = new ArrayList<Integer>();
+            if(j == 0){
+		ret.add(0);
+                return ret;
+            }
+            else if(j % 2 == 1){ // left
+                ret.add((j-1)/2); // copy parent
+		return ret;
+            }
+            else{ // right
+                if(j < n - 1){
+		    ret.add((j-1)/2);
+                }
+                else{
+                    ret.add((j-1)/2);
+                }
+		return ret;
             }
         };
     
@@ -210,7 +244,8 @@ public class Runner
             G.add(Integer.MIN_VALUE);
         }
 
-        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
+							consumes);
         llpRunner.run();
 
         System.out.println("Scan LLP time  : " + llpRunner.GetRuntime() + " ns");
@@ -231,19 +266,40 @@ public class Runner
             }
             return ret;
         };
+
+	HashMap<Integer, List<Integer>> pres = new HashMap<Integer, List<Integer>>();
+	for(int i = 0; i < n; i++) {
+	    pres.put(i, pre.apply(i, W));
+	}
+
+	Function<Integer, List<Integer>> consumes = (j) -> {
+	    return pres.get(j);
+        };
+	
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-            for(Integer i: pre.apply(j, W)) { //TODO: make sure to precompute pre list rather than call every time
-                if(G.get(j) > G.get(i) + W.get(i).get(j))
-                    return true;
+	    if(j == 0) {
+		return false;
+	    }
+            for(Integer i: pres.get(j)) {
+		try {
+		    if(G.get(j) > Math.addExact(G.get(i), W.get(i).get(j)))
+			return true;
+		} catch(ArithmeticException e) {
+		    return true;
+		}
             }
             return false;
         };
 
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
             int min = Integer.MAX_VALUE;
-            for(int i : pre.apply(j, W)){
-                if(G.get(i) + W.get(i).get(j) < min && G.get(i) != Integer.MAX_VALUE){
-                    min = G.get(i) + W.get(i).get(j);
+            for(int i : pres.get(j)){
+		try {
+		    if(Math.addExact(G.get(i), W.get(i).get(j)) < min) {
+			min = G.get(i) + W.get(i).get(j);
+		    }
+		} catch (ArithmeticException e) {
+                    continue;
                 }
             }
             return min;
@@ -257,7 +313,8 @@ public class Runner
                 G.add(Integer.MAX_VALUE);
         }
 
-        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
+							consumes);
         llpRunner.run();
 
         System.out.println("BellF LLP time : " + llpRunner.GetRuntime() + " ns");
@@ -370,10 +427,6 @@ public class Runner
             return Gj;
         };
 
-
-
-
-
         // Setup Global State and run
 
         List<Integer> G = new ArrayList<Integer>();
@@ -390,8 +443,8 @@ public class Runner
             G.add(min_index);
         }
 
-
-        Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        
+        Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs, (e)->{return Arrays.asList(new Integer[]{0});});
         llpEngine.run();
 
         return G;
@@ -419,6 +472,19 @@ public class Runner
                 }
             }
         }
+
+	Function<Integer, List<Integer>> consumes = (tid) -> {
+	    ArrayList<Integer> ret = new ArrayList<Integer>();
+            int n = G.size();
+            int i = tid / n;
+            int j = tid % n;
+            for(int k = i; i < j; i++) {
+                ret.add(i * n + k-1);
+		ret.add((k+1) * n + j);
+            }
+            ret.add(i * n + j);
+	    return ret;
+        };
 
         BiFunction<Integer, Integer, Double> s = (i, j) -> {
             Double ret = 0.0;
@@ -456,7 +522,8 @@ public class Runner
             return min;
         };
 
-        Engine<Double> llpEngine = new Engine<Double>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
+        Engine<Double> llpEngine = new Engine<Double>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
+						      consumes);
         llpEngine.run();
 
         return G;
