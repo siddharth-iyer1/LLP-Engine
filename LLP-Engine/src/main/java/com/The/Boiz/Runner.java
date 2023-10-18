@@ -390,7 +390,7 @@ public class Runner
             G.add(min_index);
         }
 
-        
+
         Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs);
         llpEngine.run();
 
@@ -463,5 +463,3 @@ public class Runner
     }
 
 }
-
-

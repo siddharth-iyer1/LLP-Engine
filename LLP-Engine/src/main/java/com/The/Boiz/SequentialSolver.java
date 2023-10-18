@@ -1,8 +1,12 @@
 package com.The.Boiz;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 /**
@@ -62,6 +66,38 @@ public class SequentialSolver
         }
         return d;
     }
+
+    public static List<Integer> seqPrims(List<List<Integer>> W) {
+        int n = W.size();
+        List<Integer> G = new ArrayList<>(n);
+
+        boolean[] visited = new boolean[n];
+        visited[0] = true;
+
+        for (int i = 0; i < n; i++) {
+            G.add(0);
+        }
+
+        for (int i = 1; i < n; i++) {
+            int minEdge = Integer.MAX_VALUE;
+            int minNode = -1;
+
+            for (int j = 0; j < n; j++) {
+            if (visited[j]) {
+                for (int k = 0; k < n; k++) {
+                if (!visited[k] && W.get(j).get(k) != -1 && W.get(j).get(k) < minEdge) {
+                    minEdge = W.get(j).get(k);
+                    minNode = k;
+                }
+                }
+            }
+            }
+
+            visited[minNode] = true;
+            G.set(minNode, minEdge);
+        }
+
+        return G;
+    }
+
 }
-
-
