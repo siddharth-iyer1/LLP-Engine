@@ -4,6 +4,9 @@ import java.sql.Array;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.Set;
 
 /**
  * Hello world!
@@ -332,8 +335,9 @@ public class Runner
 
         int n = W.size();
         int v0 = 0;     // Arbitrarily set the initial vertex to the 0th vertex
-        HashMap<Integer, Integer> e_prime = new HashMap<Integer, Integer>();
-        Process.resetTID();
+	List<Integer> parent = new ArrayList<Integer>();
+	while(parent.size() < n) parent.add(-1);
+	parent.set(0, 0);
 
         BiFunction<Integer, List<Integer>, Boolean> isFixed = (j, G) -> {
             int curr_node = j;
@@ -342,80 +346,78 @@ public class Runner
                 if(curr_node == v0){
                     return true;
                 }
+		else if(curr_node == -1) { // not connected to fixed
+		    return false;
+		}
             }
             return false;
         };
 
-        BiFunction<Integer, List<Integer>, Boolean> isE_Prime = (j, G) -> {
-            if(W.get(j).get(G.get(j)) == -1){   // If our Global State has index j pointed to by a null, not in E
+        BiFunction<Integer, List<Integer>, Boolean> isForbidden = (tid, G) -> {
+	    if(isFixed.apply(tid, parent)){ // already fixed.
                 return false;
             }
-            else{
-                Boolean condition1 = isFixed.apply(G.get(j), G);
-                Boolean condition2 = !isFixed.apply(j, G);
+	    
+	    Set<List<Integer>> ePrime = new HashSet<List<Integer>>();
+	    for(int i = 0; i < n; i++) { // check all nodes
+		if(isFixed.apply(i,parent)) {
+		    // check connected nodes
+		    for(int j = 0; j < n; j++) {
+			if(W.get(i).get(j) != -1 && !isFixed.apply(j, parent)) {
+			    ePrime.add(Arrays.asList(new Integer[]{i, j}));
+			}
+		    }
+		}
+	    }
+	    
+	    int min = Integer.MAX_VALUE;
+	    for(List<Integer> entry : ePrime) {
+		int index = entry.get(0);
+		int val = entry.get(1);
+		if(W.get(index).get(val) <= min){
+		    min = W.get(index).get(val);
+		}
+	    }
 
-                if(condition1 && condition2){
-                    return true;
-                }
-                else{
-                    return false;
-                }
-            }
-        };
-
-        BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-            // If j is fixed, return false
-            // For all predecessors
-                // Check if predecessor has the minimum weight of all edges in E'
-                // If in E'
-
-            HashMap<Integer, Integer> local_e_prime = new HashMap<>();
-            for(int k : G){
-                if(isE_Prime.apply(k, G)){
-                    local_e_prime.put(G.get(k), k);
-                }
-            }
-
-            if(isE_Prime.apply(j, G)){
-                return false;
-            }
-            else{
-                int min = Integer.MAX_VALUE;
-                for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()) {
-                    int index = entry.getKey();
-                    int val = entry.getValue();
-                    if(W.get(index).get(val) <= min){
-                        min = W.get(index).get(val);
-                    }
-                }
-
-                for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()) {
-                    if(entry.getValue() == j){
-                        int index = entry.getKey();
-                        int val = entry.getValue();
-                        if(W.get(index).get(val) == min){
-                            return true;
-                        }
-                    }
-                }
-            }
+	    for(List<Integer> entry : ePrime) {
+		if(entry.get(1) == tid){
+		    int index = entry.get(0);
+		    int val = entry.get(1);
+		    if(W.get(index).get(val) == min){
+			return true;
+		    }
+		}
+	    }
             return false;
         };
 
-        BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
+        BiFunction<Integer, List<Integer>, Integer> advance = (tid, G) -> {
             int min = Integer.MAX_VALUE;
             int Gj = 0;
-            for(Map.Entry<Integer, Integer> entry : e_prime.entrySet()) {
-                if(entry.getValue() == j){
-                    int index = entry.getKey();
-                    int val = entry.getValue();
+	    Set<List<Integer>> ePrime = new HashSet<List<Integer>>();
+	    for(int i = 0; i < n; i++) {
+		if(isFixed.apply(i,parent)) {
+		    for(int j = 0; j < n; j++) {
+			if(W.get(i).get(j) != -1 && !isFixed.apply(j, parent)) {
+			    ePrime.add(Arrays.asList(new Integer[]{i, j}));
+			}
+		    }
+		}
+	    }
+	    
+            for(List<Integer> entry : ePrime) {
+                if(entry.get(1) == tid){
+                    int index = entry.get(0);
+                    int val = entry.get(1);
+		    assert val == tid : "fokkkk";
                     if(W.get(index).get(val) <= min){
                         min = W.get(index).get(val);
                         Gj = index;
                     }
                 }
             }
-            return Gj;
+	    parent.set(tid, Gj);
+            return min;
         };
 
         // Setup Global State and run
@@ -435,7 +437,7 @@ public class Runner
         }
 
         
-        Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs, (e)->{return Arrays.asList(new Integer[]{0});});
+        Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs, (e) -> {return IntStream.range(0, n).boxed().collect(Collectors.toList());});
         llpEngine.run();
 
         return G;
@@ -519,5 +521,4 @@ public class Runner
 
         return G;
     }
-
 }
