@@ -52,6 +52,27 @@ public class AppTest
         assertEquals("Reduce " + n, seq, a.get(0)); 
     }
 
+    public void testPrims() {
+        System.out.println("========= PRIMS TEST =========");
+	int[][] test = new int[][] {
+	    {-1, 8, 9},
+	    {8, -1, 10},
+	    {9, 10, -1}
+	};
+	List<List<Integer>> W = new ArrayList<List<Integer>>();
+	for(int i = 0; i < 3; i++) {
+	    W.add(new ArrayList<Integer>());
+	    for(int j =0; j < 3; j++) {
+		W.get(i).add(test[i][j]);
+	    }
+	}
+	int n = W.size();
+	int procs = 1 << 13;
+        List<Integer> a = Runner.prims(W, Math.min(procs, n));
+	System.out.println(a);
+        assertEquals("Reduce " + n, 1, 1); 
+    }
+
     public void testScan() {
         System.out.println("========= SCAN TEST =========");
         Random rand = new Random();
@@ -101,4 +122,32 @@ public class AppTest
         assertEquals("Bellman Ford", seq, a); 
     }
 
+    public void testOBST() {
+	System.out.println("========= OBST TEST =========");
+        Random rand = new Random();
+        int n = 1 << 10;
+	int procs = 1 << 13;
+        System.out.println("OBST test size " + n);
+        List<List<Integer>> l = new ArrayList<List<Integer>>();
+        for(int i = 0; i < n; i++) {
+            l.add(new ArrayList<Integer>());
+            for(int j = 0; j < n; j++){
+                if(j == (i + 1)%n) {
+                    l.get(i).add(1);
+                }
+                else {
+                    l.get(i).add(0);
+                }
+            }
+        }
+        List<Integer> a = Runner.bellman_ford(l, Math.min(procs, n));
+
+        long sst = System.nanoTime();
+        List<Integer> seq = SequentialSolver.seqBellmanFord(l);
+        long set = System.nanoTime();
+
+        System.out.println("sequ time      : " + (set - sst) + " ns");
+        assertEquals("Bellman Ford", seq, a); 
+    }
+    
 }
