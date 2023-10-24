@@ -21,18 +21,9 @@ public class TestCaseGenerator {
         HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
         writeToScanTextFile(scanTestCases, "scanTestCases.txt");
         HashMap<List<List<Integer>>, List<Integer>> graphTestCases = generateCompleteGraphTestCases(50);
-        writeToGraphTextFile(graphTestCases, "graphTestCases.txt");
+        writeToPrimsTextFile(graphTestCases, "primsTestCases.txt");
     }
 
-    public static HashMap<List<Integer>, List<Integer>> generateScanTestCases(int numberOfTestCases) {
-        HashMap<List<Integer>, List<Integer>> scanTestCases = new HashMap<>();
-
-        for (int i = 0; i < numberOfTestCases; i++) {
-            List<Integer> input = generateRandomIntegers();
-            scanTestCases.put(input, SequentialSolver.seqScan(input));
-        }
-        return scanTestCases;
-    }
 
     public static List<Integer> generateRandomIntegers() {
         int size = 10 + RANDOM.nextInt(16); // random size between 10 and 25
@@ -43,6 +34,16 @@ public class TestCaseGenerator {
         }
 
         return numbers;
+    }
+
+    public static HashMap<List<Integer>, List<Integer>> generateScanTestCases(int numberOfTestCases) {
+        HashMap<List<Integer>, List<Integer>> scanTestCases = new HashMap<>();
+
+        for (int i = 0; i < numberOfTestCases; i++) {
+            List<Integer> input = generateRandomIntegers();
+            scanTestCases.put(input, SequentialSolver.seqScan(input));
+        }
+        return scanTestCases;
     }
 
     public static void writeToScanTextFile(HashMap<List<Integer>, List<Integer>> scanTestCases, String fileName) {
@@ -78,33 +79,6 @@ public class TestCaseGenerator {
         }
     }
 
-    public static void writeToGraphTextFile(HashMap<List<List<Integer>>, List<Integer>> graphTestCases, String fileName) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            for(List<List<Integer>> graph : graphTestCases.keySet()) {
-                writer.write("Input Graph: ");
-                writer.write(graph.toString());
-                writer.newLine();
-
-                writer.write("Expected Output, Prim's: ");
-                List<Integer> output = graphTestCases.get(graph);
-                writer.write(output.toString());
-                writer.newLine();
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static HashMap<List<List<Integer>>, List<Integer>> generateCompleteGraphTestCases(int numberOfTestCases) {
-        HashMap<List<List<Integer>>, List<Integer>> graphTestCases = new HashMap<>();
-        for(int i = 0; i < numberOfTestCases; i++) {
-            List<List<Integer>> graph = generateCompleteGraph();
-            graphTestCases.put(graph, SequentialSolver.seqPrims(graph));
-        }
-        return graphTestCases;
-    }
-
     private static List<List<Integer>> generateCompleteGraph() {
         List<List<Integer>> adjacencyList = new ArrayList<>();
 
@@ -123,5 +97,32 @@ public class TestCaseGenerator {
             adjacencyList.add(vertex);
         }
         return adjacencyList;
+    }
+
+    public static HashMap<List<List<Integer>>, List<Integer>> generateCompleteGraphTestCases(int numberOfTestCases) {
+        HashMap<List<List<Integer>>, List<Integer>> graphTestCases = new HashMap<>();
+        for(int i = 0; i < numberOfTestCases; i++) {
+            List<List<Integer>> graph = generateCompleteGraph();
+            graphTestCases.put(graph, SequentialSolver.seqPrims(graph));
+        }
+        return graphTestCases;
+    }
+
+    public static void writeToPrimsTextFile(HashMap<List<List<Integer>>, List<Integer>> graphTestCases, String fileName) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for(List<List<Integer>> graph : graphTestCases.keySet()) {
+                writer.write("Input Graph: ");
+                writer.write(graph.toString());
+                writer.newLine();
+
+                writer.write("Expected Output, Prim's: ");
+                List<Integer> output = graphTestCases.get(graph);
+                writer.write(output.toString());
+                writer.newLine();
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
