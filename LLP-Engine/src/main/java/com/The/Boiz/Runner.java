@@ -64,6 +64,22 @@ public class Runner
         }
         System.out.println();
         System.out.println(d);
+
+
+
+
+        List<Double> W3 = new ArrayList<Double>();
+        double[] freq = {2.0,3.0,4.0};
+        for(int i = 0; i < 3; i++){
+            W3.add(freq[i]);
+        }
+
+        Process.resetTID();
+        System.out.println("=================== OBST ====================");
+        List<Double> h = OBST(W3, 8);
+        System.out.println();
+        System.out.println(h);
+
     }
 
     public static List<Integer> reduce(List<Integer> A, int procs)
@@ -468,14 +484,13 @@ public class Runner
 
         Function<Integer, List<Integer>> consumes = (tid) -> {
             ArrayList<Integer> ret = new ArrayList<Integer>();
-                int n = G.size();
-                int i = tid / n;
-                int j = tid % n;
-                for(int k = i; i < j; i++) {
-                    ret.add(i * n + k-1);
-                    ret.add((k+1) * n + j);
+                int i = tid / numEles;
+                int j = tid % numEles;
+                for(int k = i; i < j; k++) {
+                    ret.add((i * numEles) + (k-1));
+                    ret.add(((k+1) * numEles) + j);
                 }
-                ret.add(i * n + j);
+                ret.add((i * numEles) + j);
             return ret;
         };
 
@@ -489,27 +504,25 @@ public class Runner
 
         BiFunction<Integer, List<Double>, Boolean> isForbidden = (tid, globalState) -> {
             ArrayList<Double> temp = new ArrayList<Double>();
-            int n = globalState.size();
-            int i = tid / n;
-            int j = tid % n;
-            for(int k = i; i < j; i++) {
-                temp.add(globalState.get(i * n + k-1) + 
+            int i = tid / numEles;
+            int j = tid % numEles;
+            for(int k = i; i < j; k++) {
+                temp.add(globalState.get((i * numEles) + (k-1)) + 
                         s.apply(i, j) + 
-                        globalState.get((k+1) * n + j));
+                        globalState.get(((k+1) * numEles) + j));
             }
             Double min = Collections.min(temp);
-            return globalState.get(i * n + j) < min;
+            return globalState.get((i * numEles) + j) < min;
         };
 
         BiFunction<Integer, List<Double>, Double> advance = (tid, globalState) -> {
             ArrayList<Double> temp = new ArrayList<Double>();
-            int n = globalState.size();
-            int i = tid / n;
-            int j = tid % n;
-            for(int k = i; i < j; i++) {
-                temp.add(globalState.get(i * n + k-1) + 
+            int i = tid / numEles;
+            int j = tid % numEles;
+            for(int k = i; i < j; k++) {
+                temp.add(globalState.get((i * numEles) + (k-1)) + 
                         s.apply(i, j) + 
-                        globalState.get((k+1) * n + j));
+                        globalState.get(((k+1) * numEles) + j));
             }
             Double min = Collections.min(temp);
             return min;
