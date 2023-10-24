@@ -503,28 +503,26 @@ public class Runner
         };
 
         BiFunction<Integer, List<Double>, Boolean> isForbidden = (tid, globalState) -> {
-            ArrayList<Double> temp = new ArrayList<Double>();
             int i = tid / numEles;
             int j = tid % numEles;
+            Double min = Double.MAX_VALUE;
             for(int k = i; i < j; k++) {
-                temp.add(globalState.get((i * numEles) + (k-1)) + 
-                        s.apply(i, j) + 
-                        globalState.get(((k+1) * numEles) + j));
+                if(globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j) < min){
+                    min = globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j);
+                }
             }
-            Double min = Collections.min(temp);
             return globalState.get((i * numEles) + j) < min;
         };
 
         BiFunction<Integer, List<Double>, Double> advance = (tid, globalState) -> {
-            ArrayList<Double> temp = new ArrayList<Double>();
             int i = tid / numEles;
             int j = tid % numEles;
+            Double min = Double.MAX_VALUE;
             for(int k = i; i < j; k++) {
-                temp.add(globalState.get((i * numEles) + (k-1)) + 
-                        s.apply(i, j) + 
-                        globalState.get(((k+1) * numEles) + j));
+                if(globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j) < min){
+                    min = globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j);
+                }
             }
-            Double min = Collections.min(temp);
             return min;
         };
 
