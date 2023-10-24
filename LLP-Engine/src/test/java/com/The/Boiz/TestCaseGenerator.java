@@ -18,9 +18,10 @@ public class TestCaseGenerator {
     private static final Random RANDOM = new Random();
 
     public static void main(String[] args) {
-        // HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
-        // writeToScanTextFile(scanTestCases, "scanTestCases.txt");
-        HashMap<List<List<Integer>>, HashMap<Integer, Integer>> g = generateCompleteGraphTestCases(5);
+        HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
+        writeToScanTextFile(scanTestCases, "scanTestCases.txt");
+        HashMap<List<List<Integer>>, List<Integer>> graphTestCases = generateCompleteGraphTestCases(50);
+        writeToGraphTextFile(graphTestCases, "graphTestCases.txt");
     }
 
     public static HashMap<List<Integer>, List<Integer>> generateScanTestCases(int numberOfTestCases) {
@@ -80,13 +81,14 @@ public class TestCaseGenerator {
     public static void writeToGraphTextFile(HashMap<List<List<Integer>>, List<Integer>> graphTestCases, String fileName) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for(List<List<Integer>> graph : graphTestCases.keySet()) {
+                writer.write("Input Graph: ");
                 writer.write(graph.toString());
-                writer.newLine();
                 writer.newLine();
 
                 writer.write("Expected Output, Prim's: ");
                 List<Integer> output = graphTestCases.get(graph);
                 writer.write(output.toString());
+                writer.newLine();
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -94,13 +96,12 @@ public class TestCaseGenerator {
         }
     }
 
-    public static HashMap<List<List<Integer>>, HashMap<Integer, Integer>> generateCompleteGraphTestCases(int numberOfTestCases) {
-        HashMap<List<List<Integer>>, HashMap<Integer, Integer>> graphTestCases = new HashMap<>();
+    public static HashMap<List<List<Integer>>, List<Integer>> generateCompleteGraphTestCases(int numberOfTestCases) {
+        HashMap<List<List<Integer>>, List<Integer>> graphTestCases = new HashMap<>();
         for(int i = 0; i < numberOfTestCases; i++) {
             List<List<Integer>> graph = generateCompleteGraph();
             graphTestCases.put(graph, SequentialSolver.seqPrims(graph));
         }
-        System.out.println(graphTestCases);
         return graphTestCases;
     }
 
@@ -121,7 +122,6 @@ public class TestCaseGenerator {
             }
             adjacencyList.add(vertex);
         }
-        System.out.println(adjacencyList);
         return adjacencyList;
     }
 }

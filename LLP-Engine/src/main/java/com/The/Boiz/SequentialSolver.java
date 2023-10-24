@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -67,7 +68,7 @@ public class SequentialSolver
         return d;
     }
 
-    public static HashMap<Integer, Integer> seqPrims(List<List<Integer>> W) {
+    public static List<Integer> seqPrims(List<List<Integer>> W) {
         // Prim's Algorithm given a graph represented by an adjacency matrix
         HashMap<Integer, Integer> addedEdges = new HashMap<Integer, Integer>();
         List<Integer> added_vertices = new ArrayList<Integer>();
@@ -90,8 +91,14 @@ public class SequentialSolver
             added_vertices.add(min_vertex);
             addedEdges.put(min_vertex, min_weight);
         }
-        System.out.println(addedEdges);
-        return addedEdges;
+        List<Integer> edges = new ArrayList<Integer>();
+        // For each item in the HashMap of added edges
+        for(int i = 0; i < num_vertices; i++){
+            edges.add(-1);
+        }
+        for(Integer key : addedEdges.keySet()) {
+            edges.set(key, addedEdges.get(key));
+        }
+        return edges;
     }
 }
-
