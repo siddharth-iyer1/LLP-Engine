@@ -67,37 +67,31 @@ public class SequentialSolver
         return d;
     }
 
-    public static List<Integer> seqPrims(List<List<Integer>> W) {
-        int n = W.size();
-        List<Integer> G = new ArrayList<>(n);
+    public static HashMap<Integer, Integer> seqPrims(List<List<Integer>> W) {
+        // Prim's Algorithm given a graph represented by an adjacency matrix
+        HashMap<Integer, Integer> addedEdges = new HashMap<Integer, Integer>();
+        List<Integer> added_vertices = new ArrayList<Integer>();
+        int num_vertices = W.size();
 
-        boolean[] visited = new boolean[n];
-        visited[0] = true;
-
-        for (int i = 0; i < n; i++) {
-            G.add(0);
-        }
-
-        for (int i = 1; i < n; i++) {
-            int minEdge = Integer.MAX_VALUE;
-            int minNode = -1;
-
-            for (int j = 0; j < n; j++) {
-            if (visited[j]) {
-                for (int k = 0; k < n; k++) {
-                if (!visited[k] && W.get(j).get(k) != -1 && W.get(j).get(k) < minEdge) {
-                    minEdge = W.get(j).get(k);
-                    minNode = k;
-                }
+        // Add the first vertex to the set of added vertices
+        added_vertices.add(0);
+        while(added_vertices.size() != num_vertices){
+            int min_weight = Integer.MAX_VALUE;
+            int min_vertex = -1;
+            for(int i = 0; i < added_vertices.size(); i++){
+                int vertex = added_vertices.get(i);
+                for(int j = 0; j < num_vertices; j++){
+                    if(!added_vertices.contains(j) && W.get(vertex).get(j) < min_weight){
+                        min_weight = W.get(vertex).get(j);
+                        min_vertex = j;
+                    }
                 }
             }
-            }
-
-            visited[minNode] = true;
-            G.set(minNode, minEdge);
+            added_vertices.add(min_vertex);
+            addedEdges.put(min_vertex, min_weight);
         }
-
-        return G;
+        System.out.println(addedEdges);
+        return addedEdges;
     }
-
 }
+

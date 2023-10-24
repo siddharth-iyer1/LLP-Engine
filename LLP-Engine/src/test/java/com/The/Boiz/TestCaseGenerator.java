@@ -13,17 +13,14 @@ import java.util.HashSet;
 
 import com.The.Boiz.SequentialSolver;
 
-// I was having issues writing the file to the tests folder so I just wrote the files then moved them.
-
 public class TestCaseGenerator {
 
     private static final Random RANDOM = new Random();
 
     public static void main(String[] args) {
-        HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
-        writeToScanTextFile(scanTestCases, "scanTestCases.txt");
-        HashMap<List<List<Integer>>, List<Integer>> graphTestCases = generateCompleteGraphTestCases(50);
-
+        // HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
+        // writeToScanTextFile(scanTestCases, "scanTestCases.txt");
+        HashMap<List<List<Integer>>, HashMap<Integer, Integer>> g = generateCompleteGraphTestCases(5);
     }
 
     public static HashMap<List<Integer>, List<Integer>> generateScanTestCases(int numberOfTestCases) {
@@ -97,39 +94,34 @@ public class TestCaseGenerator {
         }
     }
 
-    // Write me a java program that generates 50 complete graphs with 10-25 vertices and writes them to a file called completeGraphTestCases.txt
-    public static HashMap<List<List<Integer>>, List<Integer>> generateCompleteGraphTestCases(int numberOfTestCases) {
-        HashMap<List<List<Integer>>, List<Integer>> testCases = new HashMap<>();
-        for (int i = 0; i < numberOfTestCases; i++) {
-            int vertices = 10 + RANDOM.nextInt(16); // Random number between 10 and 25
-            List<List<Integer>> graph = generateCompleteGraph(vertices);
-            testCases.put(graph, SequentialSolver.seqPrims(graph));
-
+    public static HashMap<List<List<Integer>>, HashMap<Integer, Integer>> generateCompleteGraphTestCases(int numberOfTestCases) {
+        HashMap<List<List<Integer>>, HashMap<Integer, Integer>> graphTestCases = new HashMap<>();
+        for(int i = 0; i < numberOfTestCases; i++) {
+            List<List<Integer>> graph = generateCompleteGraph();
+            graphTestCases.put(graph, SequentialSolver.seqPrims(graph));
         }
-        return testCases;
+        System.out.println(graphTestCases);
+        return graphTestCases;
     }
 
-    private static List<List<Integer>> generateCompleteGraph(int vertices) {
+    private static List<List<Integer>> generateCompleteGraph() {
         List<List<Integer>> adjacencyList = new ArrayList<>();
-        
-        // To ensure unique edge weights
-        Set<Integer> usedWeights = new HashSet<>();
 
-        for (int i = 0; i < vertices; i++) {
-            List<Integer> edges = new ArrayList<>();
-            for (int j = i + 1; j < vertices; j++) {
-                int weight;
-                do {
-                    weight = RANDOM.nextInt(1000); // Assuming edge weights between 0-999
-                } while (usedWeights.contains(weight));
-                usedWeights.add(weight);
-                
-                edges.add(weight);
+        // Pick a random number between 25 and 50, this is the number of vertices
+        int numberOfVertices = 25 + RANDOM.nextInt(25);
+
+        for(int i = 0; i < numberOfVertices; i++) {
+            List<Integer> vertex = new ArrayList<>();
+            for(int j = 0; j < numberOfVertices; j++) {
+                if(i == j) {
+                    vertex.add(0);
+                } else {
+                    vertex.add(1 + RANDOM.nextInt(100));
+                }
             }
-            adjacencyList.add(edges);
+            adjacencyList.add(vertex);
         }
-
+        System.out.println(adjacencyList);
         return adjacencyList;
     }
 }
-
