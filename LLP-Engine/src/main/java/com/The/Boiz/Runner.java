@@ -29,7 +29,7 @@ public class Runner
         System.out.println("scan: " + b);
 
         List<List<Integer>> W = new ArrayList<List<Integer>>();
-        int[][] test_case_bellman = {{-1, 80, 34, 61, 98}, {80, -1, 74, 85, 92}, {34, 74, -1, 78, 34}, {61, 85, 78, -1, 91}, {98, 92, 34, 91, -1}};
+        int[][] test_case_bellman = {{-1, 73, 25, 85, 63}, {73, -1, 55, 6, 79}, {25, 55, -1, 61, 82}, {85, 6, 61, -1, 55}, {63, 79, 82, 55, -1}};
         for(int i = 0; i < 5; i++){
             List<Integer> w = new ArrayList<Integer>();
             for(int j = 0; j < 5; j++){
@@ -40,14 +40,10 @@ public class Runner
         Process.resetTID();
         System.out.println("================== Bellman ===================");
         List<Integer> c = bellman_ford(W, 8);
-        for(List<Integer> t: W) {
-            System.out.println(t);
-        }
-        System.out.println();
-        System.out.println(c);
+        System.out.println("bellman-ford: " + c);
 
         List<List<Integer>> W2 = new ArrayList<List<Integer>>();
-        int[][] test_case = {{-1, 2, -1, 5, 3}, {2, -1, 9, 6, -1}, {-1, 9 ,-1 ,4, 8}, {5, 6, 4, -1, 7}, {3, -1, 8, 7, -1}};
+        int[][] test_case = {{-1, 12, 42, 43, 46}, {12, -1, 87, 86, 25}, {42, 87, -1, 24, 50}, {43, 86, 24, -1, 1}, {46, 25, 50, 1, -1}};
         for(int i = 0; i < 5; i++){
             List<Integer> w = new ArrayList<Integer>();
             for(int j = 0; j < 5; j++){
@@ -265,6 +261,7 @@ public class Runner
         int n = W.size();
         Process.resetTID();
 
+        // Returns a list of all i's that have an edge to j
         BiFunction<Integer, List<List<Integer>>, List<Integer>> pre = (j, Graph) -> {
             List<Integer> ret = new ArrayList<Integer>();
             for(int i = 0; i < Graph.size(); i++) {
@@ -275,26 +272,30 @@ public class Runner
             return ret;
         };
 
-    HashMap<Integer, List<Integer>> pres = new HashMap<Integer, List<Integer>>();
-    for(int i = 0; i < n; i++) {
-        pres.put(i, pre.apply(i, W));
-    }
+        // All pres for every vertex
+        HashMap<Integer, List<Integer>> pres = new HashMap<Integer, List<Integer>>();
+        for(int i = 0; i < n; i++) {
+            pres.put(i, pre.apply(i, W));
+        }
 
-    Function<Integer, List<Integer>> consumes = (j) -> {
-        return pres.get(j);
+        // j is a consumer of the pres of j
+        Function<Integer, List<Integer>> consumes = (j) -> {
+            return pres.get(j);
         };
-    
+
+
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-        if(j == 0) {
-        return false;
-        }
+            if(j == 0) {
+                return false;
+            }
             for(Integer i: pres.get(j)) {
-        try {
-            if(G.get(j) > Math.addExact(G.get(i), W.get(i).get(j)))
-            return true;
-        } catch(ArithmeticException e) {
-            return true;
-        }
+                try {
+                    if(G.get(j) > Math.addExact(G.get(i), W.get(i).get(j)))
+                        return true;
+                }
+                catch(ArithmeticException e) {
+                    return true;
+                }
             }
             return false;
         };
@@ -302,11 +303,12 @@ public class Runner
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
             int min = Integer.MAX_VALUE;
             for(int i : pres.get(j)){
-        try {
-            if(Math.addExact(G.get(i), W.get(i).get(j)) < min) {
-            min = G.get(i) + W.get(i).get(j);
-            }
-        } catch (ArithmeticException e) {
+                try {
+                    if(Math.addExact(G.get(i), W.get(i).get(j)) < min) {
+                        min = Math.addExact(G.get(i), W.get(i).get(j));
+                    }
+                }
+                catch (ArithmeticException e) {
                     continue;
                 }
             }
@@ -315,7 +317,7 @@ public class Runner
 
         List<Integer> G = new ArrayList<Integer>();
         for(int i = 0; i < n; i++){
-            if(i == 0) 
+            if(i == 0)
                 G.add(0);
             else
                 G.add(Integer.MAX_VALUE);
@@ -327,7 +329,8 @@ public class Runner
 
         System.out.println("BellF LLP time : " + llpRunner.GetRuntime() + " ns");
 
-        return llpRunner.GetGlobalState();    }
+        return llpRunner.GetGlobalState();
+    }
 
     public static List<Integer> prims(List<List<Integer>> W, int procs){
 
