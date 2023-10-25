@@ -43,18 +43,12 @@ public class Engine<T> {
             prods.computeIfAbsent(temp, (e) -> new ArrayList<Integer>()).add(i);
             }
         }
-        // System.out.println(prods);
 
-            for(int i = 0; i < totalProcs+1; i++){
-                allProcs.add(new Process<T>(adv, B, globalState, procs_per_thread, mons, prods));
+        for(int i = 0; i < totalProcs+1; i++){
+            allProcs.add(new Process<T>(adv, B, globalState, procs_per_thread, mons, prods));
             mons.add(new Mailbox());
-            }
-            Process.resetTID();
-            System.out.println("Launching LLP job with " + 
-                            totalProcs +
-                            " Processors and " +
-                            procs_per_thread +
-                            " Processes per thread.");
+        }
+        Process.resetTID();
     }
 
     public List<T> GetGlobalState() {

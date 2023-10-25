@@ -131,7 +131,7 @@ public class Runner
                 try {
                     return Math.addExact(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
                 } catch (ArithmeticException e) {
-		    System.out.println("Fok2");
+		            System.out.println("Fok2");
                     return Math.max(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
                 }
             }
@@ -155,8 +155,6 @@ public class Runner
         Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
 							cons);
         llpRunner.run();
-
-        System.out.println("Reduce LLP time: " + llpRunner.GetRuntime() + " ns");
 
         return llpRunner.GetGlobalState();
     }
@@ -252,8 +250,6 @@ public class Runner
 							consumes);
         llpRunner.run();
 
-        System.out.println("Scan LLP time  : " + llpRunner.GetRuntime() + " ns");
-
         return llpRunner.GetGlobalState();
     }
 
@@ -326,8 +322,6 @@ public class Runner
         Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
                             consumes);
         llpRunner.run();
-
-        System.out.println("BellF LLP time : " + llpRunner.GetRuntime() + " ns");
 
         return llpRunner.GetGlobalState();
     }

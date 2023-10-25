@@ -79,8 +79,8 @@ public class TestCaseGenerator {
     private static List<List<Integer>> generateCompleteGraph() {
         List<List<Integer>> adjacencyList = new ArrayList<>();
 
-        // Pick a random number between 25 and 50, this is the number of vertices
-        int numberOfVertices = 5;
+        // Pick a random number between 25 and 100, this is the number of vertices
+        int numberOfVertices = 25; //+ RANDOM.nextInt(75);
 
         for(int i = 0; i < numberOfVertices; i++) {
             List<Integer> vertex = new ArrayList<>();
@@ -163,12 +163,10 @@ public class TestCaseGenerator {
     public static List<Integer> generateRandomFreqs() {
         int size = 10 + RANDOM.nextInt(8);
 
-        System.out.println(size);
         List<Integer> freqs = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             freqs.add(RANDOM.nextInt(100));
         }
-        System.out.println(freqs);
         return freqs;
     }
 
