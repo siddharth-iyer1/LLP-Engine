@@ -6,7 +6,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.Set;
 
 /**
  * Hello world!
@@ -30,14 +29,13 @@ public class Runner
         System.out.println("scan: " + b);
 
         List<List<Integer>> W = new ArrayList<List<Integer>>();
-        for(int i = 0; i < 5; i++) {
-            W.add(new ArrayList<Integer>());
-            for(int j = 0; j < 5; j++) {
-                if(j == i+1)
-                    W.get(i).add(1);
-                else
-                    W.get(i).add(0);
+        int[][] test_case_bellman = {{-1, 80, 34, 61, 98}, {80, -1, 74, 85, 92}, {34, 74, -1, 78, 34}, {61, 85, 78, -1, 91}, {98, 92, 34, 91, -1}};
+        for(int i = 0; i < 5; i++){
+            List<Integer> w = new ArrayList<Integer>();
+            for(int j = 0; j < 5; j++){
+                w.add(test_case_bellman[i][j]);
             }
+            W.add(w);
         }
         Process.resetTID();
         System.out.println("================== Bellman ===================");
@@ -49,10 +47,10 @@ public class Runner
         System.out.println(c);
 
         List<List<Integer>> W2 = new ArrayList<List<Integer>>();
-        int[][] test_case ={{-1, 8, 9}, {8, -1, 10}, {9, 10, -1}};
-        for(int i = 0; i < 3; i++){
+        int[][] test_case = {{-1, 2, -1, 5, 3}, {2, -1, 9, 6, -1}, {-1, 9 ,-1 ,4, 8}, {5, 6, 4, -1, 7}, {3, -1, 8, 7, -1}};
+        for(int i = 0; i < 5; i++){
             List<Integer> w = new ArrayList<Integer>();
-            for(int j = 0; j < 3; j++){
+            for(int j = 0; j < 5; j++){
                 w.add(test_case[i][j]);
             }
             W2.add(w);
@@ -261,26 +259,26 @@ public class Runner
             return ret;
         };
 
-	HashMap<Integer, List<Integer>> pres = new HashMap<Integer, List<Integer>>();
-	for(int i = 0; i < n; i++) {
-	    pres.put(i, pre.apply(i, W));
-	}
+    HashMap<Integer, List<Integer>> pres = new HashMap<Integer, List<Integer>>();
+    for(int i = 0; i < n; i++) {
+        pres.put(i, pre.apply(i, W));
+    }
 
-	Function<Integer, List<Integer>> consumes = (j) -> {
-	    return pres.get(j);
+    Function<Integer, List<Integer>> consumes = (j) -> {
+        return pres.get(j);
         };
-	
+    
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (j, G) -> {
-	    if(j == 0) {
-		return false;
-	    }
+        if(j == 0) {
+        return false;
+        }
             for(Integer i: pres.get(j)) {
-		try {
-		    if(G.get(j) > Math.addExact(G.get(i), W.get(i).get(j)))
-			return true;
-		} catch(ArithmeticException e) {
-		    return true;
-		}
+        try {
+            if(G.get(j) > Math.addExact(G.get(i), W.get(i).get(j)))
+            return true;
+        } catch(ArithmeticException e) {
+            return true;
+        }
             }
             return false;
         };
@@ -288,11 +286,11 @@ public class Runner
         BiFunction<Integer, List<Integer>, Integer> advance = (j, G) -> {
             int min = Integer.MAX_VALUE;
             for(int i : pres.get(j)){
-		try {
-		    if(Math.addExact(G.get(i), W.get(i).get(j)) < min) {
-			min = G.get(i) + W.get(i).get(j);
-		    }
-		} catch (ArithmeticException e) {
+        try {
+            if(Math.addExact(G.get(i), W.get(i).get(j)) < min) {
+            min = G.get(i) + W.get(i).get(j);
+            }
+        } catch (ArithmeticException e) {
                     continue;
                 }
             }
@@ -308,7 +306,7 @@ public class Runner
         }
 
         Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
-							consumes);
+                            consumes);
         llpRunner.run();
 
         System.out.println("BellF LLP time : " + llpRunner.GetRuntime() + " ns");
@@ -317,27 +315,27 @@ public class Runner
 
     public static List<Integer> prims(List<List<Integer>> W, int procs){
 
-//        var G: array[1..n-1] of real; Initially all i : G[i] = minimum edge adjacent to i;
-//        always
-//          fixed(j, G) means there exists a directed path from vj to v0 using edges in G
-//          E' := { (i, k) in E | fixed(i, G) ^ ¬fixed(k, G)};
-//          forbidden (j) means There exists some i : (i, j) in E' such that it has minimum weight w[i, j] of all edges in E 0
-//        advance(j) G[j] := min{w[i, j] | (i, j) 2 E 0 }
+    //        var G: array[1..n-1] of real; Initially all i : G[i] = minimum edge adjacent to i;
+    //        always
+    //          fixed(j, G) means there exists a directed path from vj to v0 using edges in G
+    //          E' := { (i, k) in E | fixed(i, G) ^ ¬fixed(k, G)};
+    //          forbidden (j) means There exists some i : (i, j) in E' such that it has minimum weight w[i, j] of all edges in E 0
+    //        advance(j) G[j] := min{w[i, j] | (i, j) 2 E 0 }
 
-//        We define a vertex to be fixed if by traversing the path starting from the edge proposed by
-//        that vertex leads to v 0
+    //        We define a vertex to be fixed if by traversing the path starting from the edge proposed by
+    //        that vertex leads to v 0
 
-        // In this implementation, we're going to have the indices (i) of our Global state contain the
-        // Node who is pointing to Node i
+            // In this implementation, we're going to have the indices (i) of our Global state contain the
+            // Node who is pointing to Node i
 
-        // Meaning G[i] = j, means (j, i) is a part of the Edge Set
-        // j -> i for clarification
+            // Meaning G[i] = j, means (j, i) is a part of the Edge Set
+            // j -> i for clarification
 
         int n = W.size();
         int v0 = 0;     // Arbitrarily set the initial vertex to the 0th vertex
-	List<Integer> parent = new ArrayList<Integer>();
-	while(parent.size() < n) parent.add(-1);
-	parent.set(0, 0);
+        List<Integer> parent = new ArrayList<Integer>();
+        while(parent.size() < n) parent.add(-1);
+        parent.set(0, 0);
 
         BiFunction<Integer, List<Integer>, Boolean> isFixed = (j, G) -> {
             int curr_node = j;
@@ -346,77 +344,77 @@ public class Runner
                 if(curr_node == v0){
                     return true;
                 }
-		else if(curr_node == -1) { // not connected to fixed
-		    return false;
-		}
+        else if(curr_node == -1) { // not connected to fixed
+            return false;
+        }
             }
             return false;
         };
 
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (tid, G) -> {
-	    if(isFixed.apply(tid, parent)){ // already fixed.
+        if(isFixed.apply(tid, parent)){ // already fixed.
                 return false;
             }
-	    
-	    Set<List<Integer>> ePrime = new HashSet<List<Integer>>();
-	    for(int i = 0; i < n; i++) { // check all nodes
-		if(isFixed.apply(i,parent)) {
-		    // check connected nodes
-		    for(int j = 0; j < n; j++) {
-			if(W.get(i).get(j) != -1 && !isFixed.apply(j, parent)) {
-			    ePrime.add(Arrays.asList(new Integer[]{i, j}));
-			}
-		    }
-		}
-	    }
-	    
-	    int min = Integer.MAX_VALUE;
-	    for(List<Integer> entry : ePrime) {
-		int index = entry.get(0);
-		int val = entry.get(1);
-		if(W.get(index).get(val) <= min){
-		    min = W.get(index).get(val);
-		}
-	    }
 
-	    for(List<Integer> entry : ePrime) {
-		if(entry.get(1) == tid){
-		    int index = entry.get(0);
-		    int val = entry.get(1);
-		    if(W.get(index).get(val) == min){
-			return true;
-		    }
-		}
-	    }
+        Set<List<Integer>> ePrime = new HashSet<List<Integer>>();
+        for(int i = 0; i < n; i++) { // check all nodes
+        if(isFixed.apply(i,parent)) {
+            // check connected nodes
+            for(int j = 0; j < n; j++) {
+            if(W.get(i).get(j) != -1 && !isFixed.apply(j, parent)) {
+                ePrime.add(Arrays.asList(new Integer[]{i, j}));
+            }
+            }
+        }
+        }
+
+        int min = Integer.MAX_VALUE;
+        for(List<Integer> entry : ePrime) {
+        int index = entry.get(0);
+        int val = entry.get(1);
+        if(W.get(index).get(val) <= min){
+            min = W.get(index).get(val);
+        }
+        }
+
+        for(List<Integer> entry : ePrime) {
+        if(entry.get(1) == tid){
+            int index = entry.get(0);
+            int val = entry.get(1);
+            if(W.get(index).get(val) == min){
+            return true;
+            }
+        }
+        }
             return false;
         };
 
         BiFunction<Integer, List<Integer>, Integer> advance = (tid, G) -> {
             int min = Integer.MAX_VALUE;
             int Gj = 0;
-	    Set<List<Integer>> ePrime = new HashSet<List<Integer>>();
-	    for(int i = 0; i < n; i++) {
-		if(isFixed.apply(i,parent)) {
-		    for(int j = 0; j < n; j++) {
-			if(W.get(i).get(j) != -1 && !isFixed.apply(j, parent)) {
-			    ePrime.add(Arrays.asList(new Integer[]{i, j}));
-			}
-		    }
-		}
-	    }
-	    
+        Set<List<Integer>> ePrime = new HashSet<List<Integer>>();
+        for(int i = 0; i < n; i++) {
+        if(isFixed.apply(i,parent)) {
+            for(int j = 0; j < n; j++) {
+            if(W.get(i).get(j) != -1 && !isFixed.apply(j, parent)) {
+                ePrime.add(Arrays.asList(new Integer[]{i, j}));
+            }
+            }
+        }
+        }
+        
             for(List<Integer> entry : ePrime) {
                 if(entry.get(1) == tid){
                     int index = entry.get(0);
                     int val = entry.get(1);
-		    assert val == tid : "fokkkk";
+            assert val == tid : "fokkkk";
                     if(W.get(index).get(val) <= min){
                         min = W.get(index).get(val);
                         Gj = index;
                     }
                 }
             }
-	    parent.set(tid, Gj);
+        parent.set(tid, Gj);
             return min;
         };
 
@@ -436,9 +434,11 @@ public class Runner
             G.add(min_index);
         }
 
-        
+
         Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs, (e) -> {return IntStream.range(0, n).boxed().collect(Collectors.toList());});
         llpEngine.run();
+
+        G.set(0,0);
 
         return G;
     }
@@ -466,17 +466,17 @@ public class Runner
             }
         }
 
-	Function<Integer, List<Integer>> consumes = (tid) -> {
-	    ArrayList<Integer> ret = new ArrayList<Integer>();
-            int n = G.size();
-            int i = tid / n;
-            int j = tid % n;
-            for(int k = i; i < j; i++) {
-                ret.add(i * n + k-1);
-		ret.add((k+1) * n + j);
-            }
-            ret.add(i * n + j);
-	    return ret;
+        Function<Integer, List<Integer>> consumes = (tid) -> {
+            ArrayList<Integer> ret = new ArrayList<Integer>();
+                int n = G.size();
+                int i = tid / n;
+                int j = tid % n;
+                for(int k = i; i < j; i++) {
+                    ret.add(i * n + k-1);
+                    ret.add((k+1) * n + j);
+                }
+                ret.add(i * n + j);
+            return ret;
         };
 
         BiFunction<Integer, Integer, Double> s = (i, j) -> {
@@ -494,8 +494,8 @@ public class Runner
             int j = tid % n;
             for(int k = i; i < j; i++) {
                 temp.add(globalState.get(i * n + k-1) + 
-                         s.apply(i, j) + 
-                         globalState.get((k+1) * n + j));
+                        s.apply(i, j) + 
+                        globalState.get((k+1) * n + j));
             }
             Double min = Collections.min(temp);
             return globalState.get(i * n + j) < min;
@@ -508,15 +508,15 @@ public class Runner
             int j = tid % n;
             for(int k = i; i < j; i++) {
                 temp.add(globalState.get(i * n + k-1) + 
-                         s.apply(i, j) + 
-                         globalState.get((k+1) * n + j));
+                        s.apply(i, j) + 
+                        globalState.get((k+1) * n + j));
             }
             Double min = Collections.min(temp);
             return min;
         };
 
         Engine<Double> llpEngine = new Engine<Double>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
-						      consumes);
+                            consumes);
         llpEngine.run();
 
         return G;

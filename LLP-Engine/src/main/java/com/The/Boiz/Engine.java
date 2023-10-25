@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class Engine<T> {
-    
+
     private List<Process<T>> allProcs;
     private int totalProcs;
     BiFunction<Integer, List<T>, Boolean> B;
@@ -22,11 +22,11 @@ public class Engine<T> {
 
 
     public Engine(BiFunction<Integer, List<T>, T> adv,
-                  BiFunction<Integer, List<T>, Boolean> B,
-                  Function<List<Boolean>, Boolean> isDone,
-                  List<T> globalState, int totalProcs,
-		  Function<Integer, List<Integer>> cons) {
-        
+                BiFunction<Integer, List<T>, Boolean> B,
+                Function<List<Boolean>, Boolean> isDone,
+                List<T> globalState, int totalProcs,
+                Function<Integer, List<Integer>> cons) 
+    {
         this.totalProcs = totalProcs;
         this.globalState = globalState;
         this.allProcs = new ArrayList<Process<T>>();
@@ -34,26 +34,27 @@ public class Engine<T> {
         this.B = B;
         this.adv = adv;
         int procs_per_thread = Math.max((int)Math.ceil(globalState.size() / (double) totalProcs), 1);
-	this.mons = new ArrayList<Mailbox>();
-	Map<Integer, List<Integer>> prods = new HashMap<Integer, List<Integer>>();
+        this.mons = new ArrayList<Mailbox>();
 
-	for(int i = 0; i < globalState.size(); i++) {
-	    for(Integer temp: cons.apply(i)) {
-		prods.computeIfAbsent(temp, (e) -> new ArrayList<Integer>()).add(i);
-	    }
-	}
-	// System.out.println(prods);
+        Map<Integer, List<Integer>> prods = new HashMap<Integer, List<Integer>>();
 
-        for(int i = 0; i < totalProcs+1; i++){
-            allProcs.add(new Process<T>(adv, B, globalState, procs_per_thread, mons, prods));
-	    mons.add(new Mailbox());
+        for(int i = 0; i < globalState.size(); i++) {
+            for(Integer temp: cons.apply(i)) {
+            prods.computeIfAbsent(temp, (e) -> new ArrayList<Integer>()).add(i);
+            }
         }
-        Process.resetTID();
-        System.out.println("Launching LLP job with " + 
-                           totalProcs +
-                           " Processors and " +
-                           procs_per_thread +
-                           " Processes per thread.");
+        // System.out.println(prods);
+
+            for(int i = 0; i < totalProcs+1; i++){
+                allProcs.add(new Process<T>(adv, B, globalState, procs_per_thread, mons, prods));
+            mons.add(new Mailbox());
+            }
+            Process.resetTID();
+            System.out.println("Launching LLP job with " + 
+                            totalProcs +
+                            " Processors and " +
+                            procs_per_thread +
+                            " Processes per thread.");
     }
 
     public List<T> GetGlobalState() {

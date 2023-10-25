@@ -18,12 +18,11 @@ public class Mailbox {
     }
 
     public synchronized boolean hasPendingSignal() {
-	return signalledSinceLast;
+        return signalledSinceLast;
     }
 
     public synchronized void swait() throws InterruptedException{
-	if(signalledSinceLast)
-	    return;
+	if(signalledSinceLast) return;
 	super.wait();
     }
 
@@ -33,5 +32,5 @@ public class Mailbox {
 	signalledSinceLast = true;
 	super.notifyAll();
     }
-    
+
 }
