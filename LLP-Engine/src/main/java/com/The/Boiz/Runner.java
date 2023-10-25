@@ -490,11 +490,9 @@ public class Runner
                 int i = tid / numEles;
                 int j = tid % numEles;
                 if(j <= i){
-                    int temp = i;
-                    i = j;
-                    j = temp;
+                    return ret;
                 }
-                for(int k = i; k < j; k++) {
+                for(int k = i; k <= j; k++) {
                     ret.add((i * numEles) + (k-1));
                     ret.add(((k+1) * numEles) + j);
                 }
@@ -504,6 +502,9 @@ public class Runner
 
         BiFunction<Integer, Integer, Integer> s = (i, j) -> {
             int ret = 0;
+            if(i > j) {
+                return ret;
+            }
             for(int k = i; k <= j; k++) {
                 ret += probs.get(k);
             }
@@ -513,17 +514,28 @@ public class Runner
         BiFunction<Integer, List<Integer>, Boolean> isForbidden = (tid, globalState) -> {
             int i = tid / numEles;
             int j = tid % numEles;
-            if(j <= i){
-                int temp = i;
-                i = j;
-                j = temp;
+            if(j <= i) {
+                return false;
             }
+            boolean have_done = false;
             Integer min = Integer.MAX_VALUE;
-            for(int k = i; k < j; k++) {
-                if(i == 0 && k == 0) continue;
-                if(globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j) < min){
-                    min = globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j);
+            for(int k = i; k <= j; k++) {
+                int self = probs.get(k);
+                int left = 0;
+                if((i * numEles) + (k-1) >= 0) {
+                    left = globalState.get((i * numEles) + (k-1)) + s.apply(i, k-1);
+                } 
+                int right = 0;
+                if(((k+1) * numEles + j) < globalState.size()) {
+                    right = globalState.get(((k+1) * numEles) + j) + s.apply(k+1, j);
                 }
+                if(self + left + right < min) {
+                    min = self + left + right;
+                    have_done = true;
+                }
+            }
+            if(!have_done) {
+                min = Integer.MAX_VALUE;
             }
             return globalState.get((i * numEles) + j) < min;
         };
@@ -532,16 +544,27 @@ public class Runner
             int i = tid / numEles;
             int j = tid % numEles;
             if(j <= i){
-                int temp = i;
-                i = j;
-                j = temp;
+                return -1;
             }
+            boolean have_done = false;
             Integer min = Integer.MAX_VALUE;
-            for(int k = i; k < j; k++) {
-                if(i == 0 && k == 0) continue;
-                if(globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j) < min){
-                    min = globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j);
+            for(int k = i; k <= j; k++) {
+                int self = probs.get(k);
+                int left = 0;
+                if((i * numEles) + (k-1) >= 0) {
+                    left = globalState.get((i * numEles) + (k-1)) + s.apply(i, k-1);
+                } 
+                int right = 0;
+                if(((k+1) * numEles + j) < globalState.size()) {
+                    right = globalState.get(((k+1) * numEles) + j) + s.apply(k+1, j);
                 }
+                if(self + left + right < min) {
+                    min = self + left + right;
+                    have_done = true;
+                }
+            }
+            if(!have_done) {
+                min = Integer.MAX_VALUE;
             }
             return min;
         };
