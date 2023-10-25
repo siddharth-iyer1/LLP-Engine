@@ -99,6 +99,7 @@ public class SequentialSolver
         for(Integer key : addedEdges.keySet()) {
             edges.set(key, addedEdges.get(key));
         }
+
         return edges;
     }
 }

@@ -5,13 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.HashMap;
-import java.util.HashSet;
-
-import com.The.Boiz.SequentialSolver;
 
 public class TestCaseGenerator {
 
@@ -20,10 +15,9 @@ public class TestCaseGenerator {
     public static void main(String[] args) {
         HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
         writeToScanTextFile(scanTestCases, "scanTestCases.txt");
-        HashMap<List<List<Integer>>, List<Integer>> graphTestCases = generateCompleteGraphTestCases(50);
-        writeToPrimsTextFile(graphTestCases, "primsTestCases.txt");
+        List<HashMap<List<List<Integer>>, List<Integer>>> graphTestCases = generateCompleteGraphTestCases(3);
+        writeToGraphTextFile(graphTestCases, "graphTestCases.txt");
     }
-
 
     public static List<Integer> generateRandomIntegers() {
         int size = 10 + RANDOM.nextInt(16); // random size between 10 and 25
@@ -83,15 +77,18 @@ public class TestCaseGenerator {
         List<List<Integer>> adjacencyList = new ArrayList<>();
 
         // Pick a random number between 25 and 50, this is the number of vertices
-        int numberOfVertices = 25 + RANDOM.nextInt(25);
+        int numberOfVertices = 5;
 
         for(int i = 0; i < numberOfVertices; i++) {
             List<Integer> vertex = new ArrayList<>();
             for(int j = 0; j < numberOfVertices; j++) {
                 if(i == j) {
-                    vertex.add(0);
-                } else {
-                    vertex.add(1 + RANDOM.nextInt(100));
+                    vertex.add(-1);
+                } else if(j > i) { // For the upper triangular part
+                    int value = 1 + RANDOM.nextInt(100);
+                    vertex.add(value);
+                } else { // For the lower triangular part
+                    vertex.add(adjacencyList.get(j).get(i));
                 }
             }
             adjacencyList.add(vertex);
@@ -99,30 +96,65 @@ public class TestCaseGenerator {
         return adjacencyList;
     }
 
-    public static HashMap<List<List<Integer>>, List<Integer>> generateCompleteGraphTestCases(int numberOfTestCases) {
-        HashMap<List<List<Integer>>, List<Integer>> graphTestCases = new HashMap<>();
+    public static List<HashMap<List<List<Integer>>, List<Integer>>> generateCompleteGraphTestCases(int numberOfTestCases) {
+        HashMap<List<List<Integer>>, List<Integer>> primsTestCases = new HashMap<>();
+        HashMap<List<List<Integer>>, List<Integer>> bellmanFordTestCases = new HashMap<>();
         for(int i = 0; i < numberOfTestCases; i++) {
             List<List<Integer>> graph = generateCompleteGraph();
-            graphTestCases.put(graph, SequentialSolver.seqPrims(graph));
+            primsTestCases.put(graph, SequentialSolver.seqPrims(graph));
         }
-        return graphTestCases;
+        for(int i = 0; i < numberOfTestCases; i++){
+            List<List<Integer>> graph = generateCompleteGraph();
+            bellmanFordTestCases.put(graph, SequentialSolver.seqBellmanFord(graph));
+        }
+        List<HashMap<List<List<Integer>>, List<Integer>>> testCases = new ArrayList<>();
+        testCases.add(primsTestCases);
+        testCases.add(bellmanFordTestCases);
+        return testCases;
     }
 
-    public static void writeToPrimsTextFile(HashMap<List<List<Integer>>, List<Integer>> graphTestCases, String fileName) {
+    public static void writeToGraphTextFile(List<HashMap<List<List<Integer>>, List<Integer>>> graphTestCases, String fileName) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            for(List<List<Integer>> graph : graphTestCases.keySet()) {
-                writer.write("Input Graph: ");
-                writer.write(graph.toString());
-                writer.newLine();
+                for(List<List<Integer>> graph : graphTestCases.get(0).keySet()) {
+                    writer.write("Input Graph: ");
+                    // Replace [ with { and ] with } to make it a set
+                    String graphString = graph.toString();
+                    graphString = graphString.replace('[', '{');
+                    graphString = graphString.replace(']', '}');
+                    writer.write(graphString);
+                    writer.newLine();
 
-                writer.write("Expected Output, Prim's: ");
-                List<Integer> output = graphTestCases.get(graph);
-                writer.write(output.toString());
-                writer.newLine();
-                writer.newLine();
-            }
-        } catch (IOException e) {
+                    writer.write("Expected Output, Prim's: ");
+                    List<Integer> output = graphTestCases.get(0).get(graph);
+                    String outputString = output.toString();
+                    outputString = outputString.replace('[', '{');
+                    outputString = outputString.replace(']', '}');
+                    writer.write(outputString);
+                    writer.newLine();
+                    writer.newLine();
+                }
+                for(List<List<Integer>> graph2 : graphTestCases.get(1).keySet()) {
+                    writer.write("Input Graph: ");
+                    // Replace [ with { and ] with } to make it a set
+                    String graph2String = graph2.toString();
+                    graph2String = graph2String.replace('[', '{');
+                    graph2String = graph2String.replace(']', '}');
+                    writer.write(graph2String);
+                    writer.newLine();
+
+                    writer.write("Expected Output, Bellman-Ford: ");
+                    List<Integer> bOutput = graphTestCases.get(1).get(graph2);
+                    String bOutputString = bOutput.toString();
+                    bOutputString = bOutputString.replace('[', '{');
+                    bOutputString = bOutputString.replace(']', '}');
+                    writer.write(bOutputString);
+                    writer.newLine();
+                    writer.newLine();
+                }
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }
