@@ -13,10 +13,12 @@ public class TestCaseGenerator {
     private static final Random RANDOM = new Random();
 
     public static void main(String[] args) {
-        HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
-        writeToScanTextFile(scanTestCases, "scanTestCases.txt");
-        List<HashMap<List<List<Integer>>, List<Integer>>> graphTestCases = generateCompleteGraphTestCases(3);
-        writeToGraphTextFile(graphTestCases, "graphTestCases.txt");
+        // HashMap<List<Integer>, List<Integer>> scanTestCases = generateScanTestCases(50);
+        // writeToScanTextFile(scanTestCases, "scanTestCases.txt");
+        // List<HashMap<List<List<Integer>>, List<Integer>>> graphTestCases = generateCompleteGraphTestCases(3);
+        // writeToGraphTextFile(graphTestCases, "graphTestCases.txt");
+        HashMap<List<Integer>, List<Integer>> OBSTTestCases = generateOBSTTestCases(50);
+        writeToOBSTTextFile(OBSTTestCases, "OBSTTestCases.txt");
     }
 
     public static List<Integer> generateRandomIntegers() {
@@ -158,4 +160,58 @@ public class TestCaseGenerator {
         }
     }
 
+    public static List<Integer> generateRandomFreqs() {
+        int size = 10 + RANDOM.nextInt(8);
+
+        System.out.println(size);
+        List<Integer> freqs = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            freqs.add(RANDOM.nextInt(100));
+        }
+        System.out.println(freqs);
+        return freqs;
+    }
+
+    public static HashMap<List<Integer>, List<Integer>> generateOBSTTestCases(int numberOfTestCases) {
+        HashMap<List<Integer>, List<Integer>> obstTestCases = new HashMap<>();
+
+        for (int i = 0; i < numberOfTestCases; i++) {
+            List<Integer> freqs = generateRandomFreqs();
+            obstTestCases.put(freqs, SequentialSolver.seqOBST(freqs));
+        }
+        return obstTestCases;
+    }
+
+    public static void writeToOBSTTextFile(HashMap<List<Integer>, List<Integer>> OBSTTestCases, String fileName){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (List<Integer> input : OBSTTestCases.keySet()) {
+                // Write the input list
+                writer.write("Input: {");
+                for (int i = 0; i < input.size(); i++) {
+                    if (i != 0) {
+                        writer.write(",");
+                    }
+                    writer.write(String.valueOf(input.get(i)));
+                }
+                writer.write("}");
+                writer.newLine();
+                writer.newLine();
+
+                writer.write("Expected Output: {");
+                // Write the corresponding output from the prefix scan
+                List<Integer> output = OBSTTestCases.get(input);
+                for (int i = 0; i < output.size(); i++) {
+                    if (i != 0) {
+                        writer.write(",");
+                    }
+                    writer.write(String.valueOf(output.get(i)));
+                }
+                writer.write("}");
+                writer.newLine();
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -85,6 +85,15 @@ public class AppTest
     }
 
     public void testOBST() {
+        System.out.println("========= OBST TEST =========");
+        int num_tests = 10;
+        HashMap<List<Integer>, List<Integer>> tests = TestCaseGenerator.generateOBSTTestCases(num_tests);
+        for(Map.Entry<List<Integer>, List<Integer>> a : tests.entrySet()) {
+            int n = a.getKey().size();
+            List<Integer> freqs = a.getKey();
+            List<Integer> res = Runner.OBST(freqs, Math.min(n*n, MAX_PROCS));
+            assertEquals("OBST Test", a.getValue(), res); 
+        }
     }
     
 }

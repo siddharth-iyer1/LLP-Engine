@@ -106,17 +106,17 @@ public class SequentialSolver
         return edges;
     }
 
-    public static List<Double> seqOBST(List<Double> freq) {
+    public static List<Integer> seqOBST(List<Integer> freq) {
         int n = freq.size();
-        List<List<Double>> cost = new ArrayList<List<Double>>(); 
+        List<List<Integer>> cost = new ArrayList<List<Integer>>();
 
         for (int i = 0; i < n+1; i++) {
-            cost.add(new ArrayList<Double>());
+            cost.add(new ArrayList<Integer>());
             for (int j = 0; j < n+1; j++) {
                 if(i >= n || j >= n) {
-                    cost.get(i).add(0.0);
+                    cost.get(i).add(0);
                 } else {
-                    cost.get(i).add(i==j ? freq.get(i) : 0.0);
+                    cost.get(i).add(i==j ? freq.get(i) : 0);
                 }
             }
 
@@ -130,18 +130,18 @@ public class SequentialSolver
                 // Get column number j from row number i and 
                 // chain length L 
                 int j = i+L-1; 
-                cost.get(i).set(j, Double.POSITIVE_INFINITY);
-                double off_set_sum = 0;
+                cost.get(i).set(j, Integer.MAX_VALUE);
+                Integer off_set_sum = 0;
                 for(int t = i; t <= Math.min(j, n-1); t++) {
                     off_set_sum += freq.get(t);
                 }
-    
+
                 // Try making all possible roots 
                 for (int r = i; r <= j; r++) 
                 { 
-                    double c = ((r > i) ? cost.get(i).get(r-1):0.0) + 
-                               ((r < j) ? cost.get(r+1).get(j):0.0) + 
-                               off_set_sum;
+                    int c = ((r > i) ? cost.get(i).get(r-1):0) + 
+                            ((r < j) ? cost.get(r+1).get(j):0) + 
+                            off_set_sum;
                     if (c < cost.get(i).get(j)) 
                         cost.get(i).set(j, c); 
                 } 
