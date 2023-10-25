@@ -64,15 +64,15 @@ public class Runner
 
 
 
-        List<Double> W3 = new ArrayList<Double>();
-        double[] freq = {2.0,3.0,4.0};
+        List<Integer> W3 = new ArrayList<Integer>();
+        int[] freq = {2,3,4};
         for(int i = 0; i < 3; i++){
             W3.add(freq[i]);
         }
 
         Process.resetTID();
         System.out.println("=================== OBST ====================");
-        List<Double> h = OBST(W3, 8);
+        List<Integer> h = OBST(W3, 8);
         System.out.println();
         System.out.println(h);
 
@@ -462,7 +462,7 @@ public class Runner
         return G;
     }
 
-    public static List<Double> OBST(List<Double> probs, int procs) {
+    public static List<Integer> OBST(List<Integer> probs, int procs) {
         // input: probs, frequency of each symbol
         // init G[i, j] = 0; G[i, i] = probs[i]
         // always s(i,j) = sum probs from i to j
@@ -473,14 +473,14 @@ public class Runner
         // init global state
         int numEles = probs.size();
 
-        List<Double> G = new ArrayList<Double>();
+        List<Integer> G = new ArrayList<Integer>();
         for(int i = 0; i < numEles; i++) {
             for(int j = 0; j < numEles; j++) {
                 if(i == j) {
                     G.add(probs.get(i));
                 }
                 else {
-                    G.add(0.0);
+                    G.add(0);
                 }
             }
         }
@@ -489,7 +489,12 @@ public class Runner
             ArrayList<Integer> ret = new ArrayList<Integer>();
                 int i = tid / numEles;
                 int j = tid % numEles;
-                for(int k = i; i < j; k++) {
+                if(j <= i){
+                    int temp = i;
+                    i = j;
+                    j = temp;
+                }
+                for(int k = i; k < j; k++) {
                     ret.add((i * numEles) + (k-1));
                     ret.add(((k+1) * numEles) + j);
                 }
@@ -497,19 +502,25 @@ public class Runner
             return ret;
         };
 
-        BiFunction<Integer, Integer, Double> s = (i, j) -> {
-            Double ret = 0.0;
+        BiFunction<Integer, Integer, Integer> s = (i, j) -> {
+            int ret = 0;
             for(int k = i; k <= j; k++) {
                 ret += probs.get(k);
             }
             return ret;
         };
 
-        BiFunction<Integer, List<Double>, Boolean> isForbidden = (tid, globalState) -> {
+        BiFunction<Integer, List<Integer>, Boolean> isForbidden = (tid, globalState) -> {
             int i = tid / numEles;
             int j = tid % numEles;
-            Double min = Double.MAX_VALUE;
-            for(int k = i; i < j; k++) {
+            if(j <= i){
+                int temp = i;
+                i = j;
+                j = temp;
+            }
+            Integer min = Integer.MAX_VALUE;
+            for(int k = i; k < j; k++) {
+                if(i == 0 && k == 0) continue;
                 if(globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j) < min){
                     min = globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j);
                 }
@@ -517,11 +528,17 @@ public class Runner
             return globalState.get((i * numEles) + j) < min;
         };
 
-        BiFunction<Integer, List<Double>, Double> advance = (tid, globalState) -> {
+        BiFunction<Integer, List<Integer>, Integer> advance = (tid, globalState) -> {
             int i = tid / numEles;
             int j = tid % numEles;
-            Double min = Double.MAX_VALUE;
-            for(int k = i; i < j; k++) {
+            if(j <= i){
+                int temp = i;
+                i = j;
+                j = temp;
+            }
+            Integer min = Integer.MAX_VALUE;
+            for(int k = i; k < j; k++) {
+                if(i == 0 && k == 0) continue;
                 if(globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j) < min){
                     min = globalState.get((i * numEles) + (k-1)) + s.apply(i, j) + globalState.get(((k+1) * numEles) + j);
                 }
@@ -529,7 +546,7 @@ public class Runner
             return min;
         };
 
-        Engine<Double> llpEngine = new Engine<Double>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
+        Engine<Integer> llpEngine = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
                             consumes);
         llpEngine.run();
 
