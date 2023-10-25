@@ -75,7 +75,6 @@ public class Engine<T> {
             if(isDone.apply(allProcs.stream().map(e -> e.isForbidden()).collect(Collectors.toList()))) {
                 break;
             }
-	    System.out.println(globalState);
         }
         this.endTime = System.nanoTime();
         for(Process<T> p: allProcs) {

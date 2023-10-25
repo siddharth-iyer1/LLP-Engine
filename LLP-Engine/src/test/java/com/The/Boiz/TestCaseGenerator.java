@@ -20,7 +20,8 @@ public class TestCaseGenerator {
     }
 
     public static List<Integer> generateRandomIntegers() {
-        int size = 10 + RANDOM.nextInt(16); // random size between 10 and 25
+        int size = 10 + RANDOM.nextInt(8); // random size between 10 and 25
+        size = 1 << size;
 
         List<Integer> numbers = new ArrayList<>();
         for (int i = 0; i < size; i++) {

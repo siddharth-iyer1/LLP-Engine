@@ -1,7 +1,9 @@
 package com.The.Boiz;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import junit.framework.Test;
@@ -14,6 +16,7 @@ import junit.framework.TestSuite;
 public class AppTest 
     extends TestCase
 {
+    final int MAX_PROCS = 1 << 14;
     /**
      * Create the test case
      *
@@ -34,120 +37,54 @@ public class AppTest
 
     public void testReduce() {
         System.out.println("========= REDUCE TEST =========");
-        Random rand = new Random();
-        int n = 1 << 10;
-	int procs = 1 << 13;
-        System.out.println("Reduce test size " + n);
-        List<Integer> l = new ArrayList<Integer>();
-        for(int i = 0; i < n; i++) {
-            l.add(128);
+        int num_tests = 10;
+        HashMap<List<Integer>, List<Integer>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
+        for(Map.Entry<List<Integer>, List<Integer>> a : tests.entrySet()) {
+            int n = a.getKey().size();
+            List<Integer> l = a.getKey();
+            List<Integer> res = Runner.reduce(l, Math.min(n, MAX_PROCS));
+            assertEquals("Reduce Test", a.getKey().stream().mapToInt(e -> e).sum(), res.get(0).intValue()); 
         }
-        List<Integer> a = Runner.reduce(l, Math.min(procs, n));
-
-        long sst = System.nanoTime();
-        Integer seq = SequentialSolver.seqReduce(l);
-        long set = System.nanoTime();
-
-        System.out.println("sequ time      : " + (set - sst) + " ns");
-        assertEquals("Reduce " + n, seq, a.get(0)); 
     }
 
     public void testPrims() {
         System.out.println("========= PRIMS TEST =========");
-	int[][] test = new int[][] {
-	    {-1, 8, 9},
-	    {8, -1, 10},
-	    {9, 10, -1}
-	};
-	List<List<Integer>> W = new ArrayList<List<Integer>>();
-	for(int i = 0; i < 3; i++) {
-	    W.add(new ArrayList<Integer>());
-	    for(int j =0; j < 3; j++) {
-		W.get(i).add(test[i][j]);
-	    }
-	}
-	int n = W.size();
-	int procs = 1 << 13;
-        List<Integer> a = Runner.prims(W, Math.min(procs, n));
-	System.out.println(a);
-        assertEquals("Reduce " + n, 1, 1); 
+        int num_tests = 10;
+        HashMap<List<List<Integer>>, List<Integer>> tests = TestCaseGenerator.generateCompleteGraphTestCases(num_tests).get(0); // idx 0 prims tests
+        for(Map.Entry<List<List<Integer>>, List<Integer>> a : tests.entrySet()) {
+            int n = a.getKey().size();
+            List<List<Integer>> W = a.getKey();
+            List<Integer> res = Runner.prims(W, Math.min(n*n, MAX_PROCS));
+            assertEquals("Prims Test", a.getValue(), res); 
+        }
     }
 
     public void testScan() {
         System.out.println("========= SCAN TEST =========");
-        Random rand = new Random();
-        int n = 1 << 10;
-	int procs = 1 << 13;
-        System.out.println("Scan test size " + n);
-        List<Integer> l = new ArrayList<Integer>();
-        for(int i = 0; i < n; i++) {
-            l.add(i % 128);
+        int num_tests = 10;
+        HashMap<List<Integer>, List<Integer>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
+        for(Map.Entry<List<Integer>, List<Integer>> a : tests.entrySet()) {
+            int n = a.getKey().size();
+            assert (n & (n - 1)) == 0 : "Not power of 2 test";
+            List<Integer> l = a.getKey();
+            List<Integer> res = Runner.scan(l, Math.min(2*n, MAX_PROCS));
+            assertEquals("Scan Test", a.getValue(), res.subList(n-1, 2*n-1)); 
         }
-        List<Integer> a = Runner.scan(l, Math.min(procs, n));
-
-        long sst = System.nanoTime();
-        List<Integer> seq = SequentialSolver.seqScan(l);
-        long set = System.nanoTime();
-
-        System.out.println("sequ time      : " + (set - sst) + " ns");
-        assertEquals("Scan", seq, a.subList(n-1, 2*n-1)); 
     }
 
     public void testBelmanFord() {
         System.out.println("========= BELLMAN FORD TEST =========");
-        Random rand = new Random();
-        int n = 1 << 10;
-	int procs = 1 << 13;
-        System.out.println("Bellman ford test size " + n);
-        List<List<Integer>> l = new ArrayList<List<Integer>>();
-        for(int i = 0; i < n; i++) {
-            l.add(new ArrayList<Integer>());
-            for(int j = 0; j < n; j++){
-                if(j == (i + 1)%n) {
-                    l.get(i).add(1);
-                }
-                else {
-                    l.get(i).add(0);
-                }
-            }
+        int num_tests = 10;
+        HashMap<List<List<Integer>>, List<Integer>> tests = TestCaseGenerator.generateCompleteGraphTestCases(num_tests).get(1); // idx 0 belman ford tests
+        for(Map.Entry<List<List<Integer>>, List<Integer>> a : tests.entrySet()) {
+            int n = a.getKey().size();
+            List<List<Integer>> W = a.getKey();
+            List<Integer> res = Runner.bellman_ford(W, Math.min(n*n, MAX_PROCS));
+            assertEquals("Bellman Ford Test", a.getValue(), res); 
         }
-        List<Integer> a = Runner.bellman_ford(l, Math.min(procs, n));
-	System.out.println("LLP Done");
-
-        long sst = System.nanoTime();
-        List<Integer> seq = SequentialSolver.seqBellmanFord(l);
-        long set = System.nanoTime();
-
-        System.out.println("sequ time      : " + (set - sst) + " ns");
-        assertEquals("Bellman Ford", seq, a); 
     }
 
     public void testOBST() {
-	System.out.println("========= OBST TEST =========");
-        Random rand = new Random();
-        int n = 1 << 10;
-	int procs = 1 << 13;
-        System.out.println("OBST test size " + n);
-        List<List<Integer>> l = new ArrayList<List<Integer>>();
-        for(int i = 0; i < n; i++) {
-            l.add(new ArrayList<Integer>());
-            for(int j = 0; j < n; j++){
-                if(j == (i + 1)%n) {
-                    l.get(i).add(1);
-                }
-                else {
-                    l.get(i).add(0);
-                }
-            }
-        }
-        List<Integer> a = Runner.bellman_ford(l, Math.min(procs, n));
-
-        long sst = System.nanoTime();
-        List<Integer> seq = SequentialSolver.seqBellmanFord(l);
-        long set = System.nanoTime();
-
-        System.out.println("sequ time      : " + (set - sst) + " ns");
-        assertEquals("Bellman Ford", seq, a); 
     }
     
 }

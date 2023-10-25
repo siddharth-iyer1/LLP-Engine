@@ -97,7 +97,7 @@ public class SequentialSolver
         List<Integer> edges = new ArrayList<Integer>();
         // For each item in the HashMap of added edges
         for(int i = 0; i < num_vertices; i++){
-            edges.add(-1);
+            edges.add(0);
         }
         for(Integer key : addedEdges.keySet()) {
             edges.set(key, addedEdges.get(key));
