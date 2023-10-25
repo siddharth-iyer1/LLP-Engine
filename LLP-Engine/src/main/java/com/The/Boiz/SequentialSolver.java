@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -36,36 +37,38 @@ public class SequentialSolver
     }
 
     public static List<Integer> seqBellmanFord(List<List<Integer>> W) {
-        ArrayList<Integer> d = new ArrayList<Integer>();
-        for(int i = 0; i < W.size(); i++) {
-            d.add(Integer.MAX_VALUE);
-        }
-        d.set(0, 0);
+        int V = W.size();
 
-        BiFunction<Integer, List<List<Integer>>, List<Integer>> pre = (j, Graph) -> {
-            List<Integer> ret = new ArrayList<Integer>();
-            for(int i = 0; i < Graph.size(); i++) {
-                if(W.get(i).get(j) > 0 && i != j) {
-                    ret.add(i);
+        List<Integer> distance = new ArrayList<>(V);
+        boolean[] visited = new boolean[V];
+
+        for (int i = 0; i < V; i++) {
+            distance.add(Integer.MAX_VALUE);
+            visited[i] = false;
+        }
+
+        distance.set(0, 0);
+
+        // Using a priority queue to get the vertex with the minimum distance
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> Integer.compare(a[1], b[1]));
+        pq.add(new int[]{0, 0});
+
+        while (!pq.isEmpty()) {
+            int u = pq.poll()[0];
+
+            if (visited[u]) continue;
+            visited[u] = true;
+
+            for (int v = 0; v < V; v++) {
+                if (W.get(u).get(v) != null && !visited[v]
+                        && distance.get(u) + W.get(u).get(v) < distance.get(v)) {
+                    distance.set(v, distance.get(u) + W.get(u).get(v));
+                    pq.add(new int[]{v, distance.get(v)});
                 }
             }
-            return ret;
-        };
-
-        for(int v = 0; v < W.size(); v++) {
-            for (Integer u: pre.apply(v, W)) {
-                int temp;
-                try {
-                    temp = Math.addExact(d.get(u), W.get(u).get(v));
-                } catch (ArithmeticException e) {
-                    temp = Integer.MAX_VALUE;
-                }
-                if(d.get(v) > temp) {
-                    d.set(v, temp);
-                }
-            }
         }
-        return d;
+
+        return distance;
     }
 
     public static List<Integer> seqPrims(List<List<Integer>> W) {
