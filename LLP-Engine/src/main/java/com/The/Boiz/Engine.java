@@ -3,12 +3,17 @@ package com.The.Boiz;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 public class Engine<T> {
+
+    public static final Function<List<Boolean>, Boolean> ALL_FINISHED = (e) -> { return !e.contains(true);};
+    public static final Function<Integer, Function<Integer, List<Integer>>> ALL_CONSUME  = 
+                (n) -> { return (e) -> {return IntStream.range(0, n).boxed().collect(Collectors.toList());}; };
 
     private List<Process<T>> allProcs;
     private int totalProcs;
