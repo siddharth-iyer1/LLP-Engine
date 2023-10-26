@@ -26,7 +26,8 @@ public class Runner
         System.out.println("============== Parallel Prefix ===============");
         System.out.println("input: " + l);
         System.out.println("reduce: " + a);
-        System.out.println("scan: " + b);
+        List<Integer> scan_out = b.subList(b.size()/2, b.size());
+        System.out.println("scan: " + scan_out);
 
         List<List<Integer>> W = new ArrayList<List<Integer>>();
         int[][] test_case_bellman = {{-1, 73, 25, 85, 63}, {73, -1, 55, 6, 79}, {25, 55, -1, 61, 82}, {85, 6, 61, -1, 55}, {63, 79, 82, 55, -1}};
@@ -39,6 +40,11 @@ public class Runner
         }
         Process.resetTID();
         System.out.println("================== Bellman ===================");
+        System.out.println("input: ");
+        for(List<Integer> t: W) {
+            System.out.println(t);
+        }
+        System.out.println();
         List<Integer> c = bellman_ford(W, 8);
         System.out.println("bellman-ford: " + c);
 
@@ -55,6 +61,7 @@ public class Runner
         Process.resetTID();
         System.out.println("=================== Prim's ====================");
         List<Integer> d = prims(W2, 8);
+        System.out.println("input: ");
         for(List<Integer> t: W2) {
             System.out.println(t);
         }
@@ -72,6 +79,8 @@ public class Runner
 
         Process.resetTID();
         System.out.println("=================== OBST ====================");
+        System.out.println("input: ");
+        System.out.println(W3.toString());
         List<Integer> h = OBST(W3, 8);
         System.out.println();
         System.out.println(h);
