@@ -41,7 +41,7 @@ Engine(BiFunction<Integer, List<T>, T> adv,
 
 `totalProcs` is the total number of threads created for this problem. Each thread will work on `globalState.size()/totalProcs` processes. 
 
-`cons` is a Function that describes the consumer->producer relationship. This function should accept the process index as input, and return which processes it consumes as output. For example: if `G[i] = G[i+1] + G[i+2]` then `cons(i) = {i+1, i+2}`. We also provide `ALL_CONSUME` which simply makes all processes consume all other processes (this will reduce performance).
+`cons` is a Function that describes the consumer->producer relationship. This function should accept the process index as input, and return which processes it consumes as output. For example: if `G[i] = G[i+1] + G[i+2]` then `cons(i) = {i+1, i+2}`. We also provide `ALL_CONSUME.apply(n)` which simply makes all processes consume all other processes where `n` is the number of processes (this will reduce performance).
 
 Once all the functions are defined, users can simply create an engine object, and call `<engine_obj>.run()`. This will block the main thread from advancing until the LLP algorithm has concluded. 
 
