@@ -1,6 +1,5 @@
 package com.The.Boiz;
 
-import java.sql.Array;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -140,7 +139,6 @@ public class Runner
                 try {
                     return Math.addExact(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
                 } catch (ArithmeticException e) {
-		            System.out.println("Fok2");
                     return Math.max(A.get((2*j) - n + 2), A.get((2*j) - n + 3));
                 }
             }
@@ -429,7 +427,6 @@ public class Runner
                 if(entry.get(1) == tid){
                     int index = entry.get(0);
                     int val = entry.get(1);
-            assert val == tid : "fokkkk";
                     if(W.get(index).get(val) <= min){
                         min = W.get(index).get(val);
                         Gj = index;
