@@ -79,18 +79,25 @@ public class SequentialSolver
 
         // Add the first vertex to the set of added vertices
         added_vertices.add(0);
+        addedEdges.put(0,0);
         while(added_vertices.size() != num_vertices){
             int min_weight = Integer.MAX_VALUE;
             int min_vertex = -1;
+
+            // find smallest edge crossing the border
             for(int i = 0; i < added_vertices.size(); i++){
-                int vertex = added_vertices.get(i);
+                int fixed_vertex = added_vertices.get(i);
                 for(int j = 0; j < num_vertices; j++){
-                    if(!added_vertices.contains(j) && W.get(vertex).get(j) < min_weight){
-                        min_weight = W.get(vertex).get(j);
+                    if(j != fixed_vertex && // no loop
+                       W.get(fixed_vertex).get(j) > 0 && // connected
+                       !added_vertices.contains(j) && // not already fixed
+                       W.get(fixed_vertex).get(j) < min_weight){ 
+                        min_weight = W.get(fixed_vertex).get(j);
                         min_vertex = j;
                     }
                 }
             }
+
             added_vertices.add(min_vertex);
             addedEdges.put(min_vertex, min_weight);
         }

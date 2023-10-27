@@ -76,6 +76,14 @@ public class TestCaseGenerator {
         }
     }
 
+    private static boolean exists(List<List<Integer>> in, int row, int value) {
+        if(row >= in.size()) return false;
+        List<Integer> rowvalues = in.get(row);
+        if(rowvalues.contains(value)) return true;
+        return exists(in, row+1, value);
+    }
+
+
     private static List<List<Integer>> generateCompleteGraph() {
         List<List<Integer>> adjacencyList = new ArrayList<>();
 
@@ -89,6 +97,7 @@ public class TestCaseGenerator {
                     vertex.add(-1);
                 } else if(j > i) { // For the upper triangular part
                     int value = 1 + RANDOM.nextInt(100);
+                    while(exists(adjacencyList, 0, value)) {value += RANDOM.nextInt(100);};
                     vertex.add(value);
                 } else { // For the lower triangular part
                     vertex.add(adjacencyList.get(j).get(i));
