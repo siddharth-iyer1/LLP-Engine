@@ -1,4 +1,5 @@
 # LLP-Engine
+# Developed by : Siddharth Iyer, Kayvan Mansoorshahi, Varun Arumugam
 
 ## Description
 A Java Library that standardizes parallelization of algorithms, including Prefix Sum, Bellman-Ford, Prim's, and Optimal BST, through an innovative engine utilizing Lattice Linear Predicate (LLP). This engine facilitates seamless integration, allowing users to input a predicate and adapt it across various algorithm types.
