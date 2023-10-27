@@ -16,7 +16,6 @@ public class Engine<T> {
                 (n) -> { return (e) -> {return IntStream.range(0, n).boxed().collect(Collectors.toList());}; };
 
     private List<Process<T>> allProcs;
-    private int totalProcs;
     BiFunction<Integer, List<T>, Boolean> B;
     BiFunction<Integer, List<T>, T> adv;
     Function<List<Boolean>, Boolean> isDone;
@@ -32,7 +31,6 @@ public class Engine<T> {
                 List<T> globalState, int totalProcs,
                 Function<Integer, List<Integer>> cons) 
     {
-        this.totalProcs = totalProcs;
         this.globalState = globalState;
         this.allProcs = new ArrayList<Process<T>>();
         this.isDone = isDone;

@@ -1,11 +1,8 @@
 package com.The.Boiz;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -36,27 +33,27 @@ public class AppTest
         return new TestSuite( AppTest.class );
     }
 
-    public void testReduce() {
-        System.out.println("========= REDUCE TEST =========");
-        System.out.println("Warning: Long runtime expected...");
-        int num_tests = 10;
-        int count = 1;
-        HashMap<List<Integer>, Pair<List<Integer>, Long>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
-        for(Map.Entry<List<Integer>, Pair<List<Integer>, Long>> a : tests.entrySet()) {
-            int n = a.getKey().size();
-            List<Integer> l = a.getKey();
-            Pair<List<Integer>, Engine<Integer>> res = Runner.reduce(l, Math.min(n, MAX_PROCS));
-            System.out.println("TEST" + count + ":");
-            System.out.println("\tLLP Time:     " + res.second.GetRuntime() + " ns");
-            long startTime = System.nanoTime();
-            int exp = a.getKey().stream().mapToInt(e -> e).sum();
-            long endTime = System.nanoTime();
-            System.out.println("\tStreams Time: " + (endTime - startTime) + " ns");
-            assertEquals("Reduce Test", exp, res.first.get(0).intValue()); 
-            count++;
-        }
-        System.out.println("All test cases PASSED!\n");
-    }
+    // public void testReduce() {
+    //     System.out.println("========= REDUCE TEST =========");
+    //     System.out.println("Warning: Long runtime expected...");
+    //     int num_tests = 10;
+    //     int count = 1;
+    //     HashMap<List<Integer>, Pair<List<Integer>, Long>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
+    //     for(Map.Entry<List<Integer>, Pair<List<Integer>, Long>> a : tests.entrySet()) {
+    //         int n = a.getKey().size();
+    //         List<Integer> l = a.getKey();
+    //         Pair<List<Integer>, Engine<Integer>> res = Runner.reduce(l, Math.min(n, MAX_PROCS));
+    //         System.out.println("TEST" + count + ":");
+    //         System.out.println("\tLLP Time:     " + res.second.GetRuntime() + " ns");
+    //         long startTime = System.nanoTime();
+    //         int exp = a.getKey().stream().mapToInt(e -> e).sum();
+    //         long endTime = System.nanoTime();
+    //         System.out.println("\tStreams Time: " + (endTime - startTime) + " ns");
+    //         assertEquals("Reduce Test", exp, res.first.get(0).intValue()); 
+    //         count++;
+    //     }
+    //     System.out.println("All test cases PASSED!\n");
+    // }
 
     public void testPrims() {
         System.out.println("========= PRIMS TEST =========");

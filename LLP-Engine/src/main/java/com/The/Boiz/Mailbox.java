@@ -1,7 +1,5 @@
 package com.The.Boiz;
 
-import java.util.List;
-import java.util.function.BiFunction;
 
 
 // assumption: one waiter per monior

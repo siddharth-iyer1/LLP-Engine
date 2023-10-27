@@ -3,7 +3,6 @@ package com.The.Boiz;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.Map;
 
 public class Process<T> extends Thread {
@@ -53,12 +52,9 @@ public class Process<T> extends Thread {
 	}
 
 	public void run() {
-        ArrayList<Boolean> forbProcesses;
         ArrayList<Integer> updatedProcesses;
 		while(!done) {
-            forbProcesses = new ArrayList<Boolean>();
             updatedProcesses = new ArrayList<Integer>();
-            boolean wroteState = false;
 
 		    // check forbidden, and advance.
 			for(int i = 0; i < procs_per_thread; i++) {
