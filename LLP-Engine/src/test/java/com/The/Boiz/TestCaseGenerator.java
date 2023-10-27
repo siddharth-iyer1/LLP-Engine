@@ -27,7 +27,7 @@ public class TestCaseGenerator {
 
         List<Integer> numbers = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            numbers.add(RANDOM.nextInt(1000)); // assuming you want numbers between 0-999
+            numbers.add(RANDOM.nextInt(1000)-500); // assuming you want numbers between 0-999
         }
 
         return numbers;
