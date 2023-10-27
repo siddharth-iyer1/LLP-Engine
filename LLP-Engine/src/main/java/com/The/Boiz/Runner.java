@@ -132,7 +132,7 @@ public class Runner
                 try {
                     return Math.addExact(G.get(2*j + 1), G.get(2*j + 2));
                 } catch (ArithmeticException e) {
-                    return Math.max(G.get(2*j + 1), G.get(2*j + 2));
+                    return Integer.MIN_VALUE; /*max(G.get(2*j + 1), G.get(2*j + 2))*/
                 }
             }
             else {
