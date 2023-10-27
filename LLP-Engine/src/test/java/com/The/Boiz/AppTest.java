@@ -40,13 +40,17 @@ public class AppTest
         System.out.println("========= REDUCE TEST =========");
         System.out.println("Warning: Long runtime expected...");
         int num_tests = 10;
-        int test = 0;
-        HashMap<List<Integer>, List<Integer>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
-        for(Map.Entry<List<Integer>, List<Integer>> a : tests.entrySet()) {
+        HashMap<List<Integer>, Pair<List<Integer>, Long>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
+        for(Map.Entry<List<Integer>, Pair<List<Integer>, Long>> a : tests.entrySet()) {
             int n = a.getKey().size();
             List<Integer> l = a.getKey();
-            List<Integer> res = Runner.reduce(l, Math.min(n, MAX_PROCS));
-            assertEquals("Reduce Test", a.getKey().stream().mapToInt(e -> e).sum(), res.get(0).intValue()); 
+            Pair<List<Integer>, Engine<Integer>> res = Runner.reduce(l, Math.min(n, MAX_PROCS));
+            System.out.println("LLP Time:     " + res.second.GetRuntime() + " ns");
+            long startTime = System.nanoTime();
+            int exp = a.getKey().stream().mapToInt(e -> e).sum();
+            long endTime = System.nanoTime();
+            System.out.println("Streams Time: " + (endTime - startTime) + " ns");
+            assertEquals("Reduce Test", exp, res.first.get(0).intValue()); 
         }
         System.out.println("Passed!");
     }
@@ -54,12 +58,14 @@ public class AppTest
     public void testPrims() {
         System.out.println("========= PRIMS TEST =========");
         int num_tests = 10;
-        HashMap<List<List<Integer>>, List<Integer>> tests = TestCaseGenerator.generateCompleteGraphTestCases(num_tests).get(0); // idx 0 prims tests
-        for(Map.Entry<List<List<Integer>>, List<Integer>> a : tests.entrySet()) {
+        HashMap<List<List<Integer>>, Pair<List<Integer>, Long>> tests = TestCaseGenerator.generateCompleteGraphTestCases(num_tests).get(0); // idx 0 prims tests
+        for(Map.Entry<List<List<Integer>>, Pair<List<Integer>, Long>> a : tests.entrySet()) {
             int n = a.getKey().size();
             List<List<Integer>> W = a.getKey();
-            List<Integer> res = Runner.prims(W, Math.min(n*n, MAX_PROCS));
-            assertEquals("Prims Test", a.getValue(), res); 
+            Pair<List<Integer>, Engine<Integer>> res = Runner.prims(W, Math.min(n*n, MAX_PROCS));
+            System.out.println("LLP Time: " + res.second.GetRuntime() + " ns");
+            System.out.println("Seq Time: " + a.getValue().second + " ns");
+            assertEquals("Prims Test", a.getValue().first, res.first); 
         }
         System.out.println("Passed!");
     }
@@ -69,13 +75,15 @@ public class AppTest
         System.out.println("Warning: Long runtime expected...");
         int num_tests = 10;
         int test = 0;
-        HashMap<List<Integer>, List<Integer>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
-        for(Map.Entry<List<Integer>, List<Integer>> a : tests.entrySet()) {
+        HashMap<List<Integer>, Pair<List<Integer>, Long>> tests = TestCaseGenerator.generateScanTestCases(num_tests);
+        for(Map.Entry<List<Integer>, Pair<List<Integer>, Long>> a : tests.entrySet()) {
             int n = a.getKey().size();
             assert (n & (n - 1)) == 0 : "Not power of 2 test";
             List<Integer> l = a.getKey();
-            List<Integer> res = Runner.scan(l, Math.min(2*n, MAX_PROCS));
-            assertEquals("Scan Test", a.getValue(), res.subList(n-1, 2*n-1)); 
+            Pair<List<Integer>, Engine<Integer>> res = Runner.scan(l, Math.min(2*n, MAX_PROCS));
+            System.out.println("LLP Time: " + res.second.GetRuntime() + " ns");
+            System.out.println("Seq Time: " + a.getValue().second + " ns");
+            assertEquals("Scan Test", a.getValue().first, res.first.subList(n-1, 2*n-1)); 
         }
         System.out.println("Passed!");
     }
@@ -83,12 +91,14 @@ public class AppTest
     public void testBelmanFord() {
         System.out.println("========= BELLMAN FORD TEST =========");
         int num_tests = 10;
-        HashMap<List<List<Integer>>, List<Integer>> tests = TestCaseGenerator.generateCompleteGraphTestCases(num_tests).get(1); // idx 0 belman ford tests
-        for(Map.Entry<List<List<Integer>>, List<Integer>> a : tests.entrySet()) {
+        HashMap<List<List<Integer>>, Pair<List<Integer>, Long>> tests = TestCaseGenerator.generateCompleteGraphTestCases(num_tests).get(1); // idx 0 belman ford tests
+        for(Map.Entry<List<List<Integer>>, Pair<List<Integer>, Long>> a : tests.entrySet()) {
             int n = a.getKey().size();
             List<List<Integer>> W = a.getKey();
-            List<Integer> res = Runner.bellman_ford(W, Math.min(n*n, MAX_PROCS));
-            assertEquals("Bellman Ford Test", a.getValue(), res); 
+            Pair<List<Integer>, Engine<Integer>> res = Runner.bellman_ford(W, Math.min(n*n, MAX_PROCS));
+            System.out.println("LLP Time: " + res.second.GetRuntime() + " ns");
+            System.out.println("Seq Time: " + a.getValue().second + " ns");
+            assertEquals("Bellman Ford Test", a.getValue().first, res.first); 
         }
         System.out.println("Passed!");
     }
@@ -96,12 +106,14 @@ public class AppTest
     public void testOBST() {
         System.out.println("========= OBST TEST =========");
         int num_tests = 10;
-        HashMap<List<Integer>, List<Integer>> tests = TestCaseGenerator.generateOBSTTestCases(num_tests);
-        for(Map.Entry<List<Integer>, List<Integer>> a : tests.entrySet()) {
+        HashMap<List<Integer>, Pair<List<Integer>, Long>> tests = TestCaseGenerator.generateOBSTTestCases(num_tests);
+        for(Map.Entry<List<Integer>, Pair<List<Integer>, Long>> a : tests.entrySet()) {
             int n = a.getKey().size();
             List<Integer> freqs = a.getKey();
-            List<Integer> res = Runner.OBST(freqs, Math.min(n*n, MAX_PROCS));
-            assertEquals("OBST Test", a.getValue().get(n-1), res.get(n-1)); 
+            Pair<List<Integer>, Engine<Integer>> res = Runner.OBST(freqs, Math.min(n*n, MAX_PROCS));
+            System.out.println("LLP Time: " + res.second.GetRuntime() + " ns");
+            System.out.println("Seq Time: " + a.getValue().second + " ns");
+            assertEquals("OBST Test", a.getValue().first.get(n-1), res.first.get(n-1)); 
         }
         System.out.println("Passed!");
     }

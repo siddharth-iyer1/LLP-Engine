@@ -20,8 +20,8 @@ public class Runner
             l.add(i);
         }
 
-        List<Integer> a = reduce(l, 8);
-        List<Integer> b = scan(l, 8);
+        List<Integer> a = reduce(l, 8).first;
+        List<Integer> b = scan(l, 8).first;
         System.out.println("============== Parallel Prefix ===============");
         System.out.println("input: " + l);
         System.out.println("reduce: " + a);
@@ -44,7 +44,7 @@ public class Runner
             System.out.println(t);
         }
         System.out.println();
-        List<Integer> c = bellman_ford(W, 8);
+        List<Integer> c = bellman_ford(W, 8).first;
         System.out.println("bellman-ford: " + c);
 
         List<List<Integer>> W2 = new ArrayList<List<Integer>>();
@@ -59,7 +59,7 @@ public class Runner
 
         Process.resetTID();
         System.out.println("=================== Prim's ====================");
-        List<Integer> d = prims(W2, 8);
+        List<Integer> d = prims(W2, 8).first;
         System.out.println("input: ");
         for(List<Integer> t: W2) {
             System.out.println(t);
@@ -80,13 +80,13 @@ public class Runner
         System.out.println("=================== OBST ====================");
         System.out.println("input: ");
         System.out.println(W3.toString());
-        List<Integer> h = OBST(W3, 8);
+        List<Integer> h = OBST(W3, 8).first;
         System.out.println();
         System.out.println(h);
 
     }
 
-    public static List<Integer> reduce(List<Integer> A, int procs)
+    public static Pair<List<Integer>, Engine<Integer>> reduce(List<Integer> A, int procs)
     {
         int n = A.size();
         Process.resetTID();
@@ -163,11 +163,12 @@ public class Runner
 							cons);
         llpRunner.run();
 
-        return llpRunner.GetGlobalState();
+        return new Pair<List<Integer>, Engine<Integer>>(llpRunner.GetGlobalState(), llpRunner);
     }
 
-    public static List<Integer> scan(List<Integer> A, int procs){
-        List<Integer> S = reduce(A, procs);
+    public static Pair<List<Integer>, Engine<Integer>> scan(List<Integer> A, int procs){
+        Pair<List<Integer>, Engine<Integer>> t = reduce(A, procs);
+        List<Integer> S = t.first;
         Process.resetTID();
         int n = A.size();
 
@@ -256,11 +257,12 @@ public class Runner
         Engine<Integer> llpRunner = new Engine<Integer>(advance, isForbidden, (e) -> { return !e.contains(true);}, G, procs,
 							consumes);
         llpRunner.run();
+        llpRunner.addruntime(t.second.GetRuntime());
 
-        return llpRunner.GetGlobalState();
+        return new Pair<List<Integer>, Engine<Integer>>(G, llpRunner);
     }
 
-    public static List<Integer> bellman_ford(List<List<Integer>> W, int procs){
+    public static Pair<List<Integer>, Engine<Integer>> bellman_ford(List<List<Integer>> W, int procs){
         int n = W.size();
         Process.resetTID();
 
@@ -330,10 +332,10 @@ public class Runner
                             consumes);
         llpRunner.run();
 
-        return llpRunner.GetGlobalState();
+        return new Pair<List<Integer>, Engine<Integer>>(G, llpRunner);
     }
 
-    public static List<Integer> prims(List<List<Integer>> W, int procs){
+    public static Pair<List<Integer>, Engine<Integer>> prims(List<List<Integer>> W, int procs){
 
     //        var G: array[1..n-1] of real; Initially all i : G[i] = minimum edge adjacent to i;
     //        always
@@ -456,10 +458,10 @@ public class Runner
 
         G.set(0,0);
 
-        return G;
+        return new Pair<List<Integer>, Engine<Integer>>(G, llpEngine);
     }
 
-    public static List<Integer> OBST(List<Integer> probs, int procs) {
+    public static Pair<List<Integer>, Engine<Integer>> OBST(List<Integer> probs, int procs) {
         // input: probs, frequency of each symbol
         // init G[i, j] = 0; G[i, i] = probs[i]
         // always s(i,j) = sum probs from i to j
@@ -570,6 +572,6 @@ public class Runner
                             consumes);
         llpEngine.run();
 
-        return G;
+        return new Pair<List<Integer>, Engine<Integer>>(G, llpEngine);
     }
 }

@@ -17,7 +17,7 @@ public class TestCaseGenerator {
         // writeToScanTextFile(scanTestCases, "scanTestCases.txt");
         // List<HashMap<List<List<Integer>>, List<Integer>>> graphTestCases = generateCompleteGraphTestCases(3);
         // writeToGraphTextFile(graphTestCases, "graphTestCases.txt");
-        HashMap<List<Integer>, List<Integer>> OBSTTestCases = generateOBSTTestCases(50);
+        HashMap<List<Integer>, Pair<List<Integer>, Long>> OBSTTestCases = generateOBSTTestCases(50);
         writeToOBSTTextFile(OBSTTestCases, "OBSTTestCases.txt");
     }
 
@@ -33,12 +33,15 @@ public class TestCaseGenerator {
         return numbers;
     }
 
-    public static HashMap<List<Integer>, List<Integer>> generateScanTestCases(int numberOfTestCases) {
-        HashMap<List<Integer>, List<Integer>> scanTestCases = new HashMap<>();
+    public static HashMap<List<Integer>, Pair<List<Integer>, Long>> generateScanTestCases(int numberOfTestCases) {
+        HashMap<List<Integer>, Pair<List<Integer>, Long>> scanTestCases = new HashMap<>();
 
         for (int i = 0; i < numberOfTestCases; i++) {
             List<Integer> input = generateRandomIntegers();
-            scanTestCases.put(input, SequentialSolver.seqScan(input));
+            long s = System.nanoTime();
+            List<Integer> ans = SequentialSolver.seqScan(input);
+            long e = System.nanoTime();
+            scanTestCases.put(input, new Pair<List<Integer>, Long>(ans, e-s));
         }
         return scanTestCases;
     }
@@ -108,18 +111,24 @@ public class TestCaseGenerator {
         return adjacencyList;
     }
 
-    public static List<HashMap<List<List<Integer>>, List<Integer>>> generateCompleteGraphTestCases(int numberOfTestCases) {
-        HashMap<List<List<Integer>>, List<Integer>> primsTestCases = new HashMap<>();
-        HashMap<List<List<Integer>>, List<Integer>> bellmanFordTestCases = new HashMap<>();
+    public static List<HashMap<List<List<Integer>>, Pair<List<Integer>, Long>>> generateCompleteGraphTestCases(int numberOfTestCases) {
+        HashMap<List<List<Integer>>, Pair<List<Integer>, Long>> primsTestCases = new HashMap<>();
+        HashMap<List<List<Integer>>, Pair<List<Integer>, Long>> bellmanFordTestCases = new HashMap<>();
         for(int i = 0; i < numberOfTestCases; i++) {
             List<List<Integer>> graph = generateCompleteGraph();
-            primsTestCases.put(graph, SequentialSolver.seqPrims(graph));
+            long s = System.nanoTime();
+            List<Integer> ans = SequentialSolver.seqPrims(graph);
+            long e = System.nanoTime();
+            primsTestCases.put(graph, new Pair<List<Integer>, Long>(ans, e-s));
         }
         for(int i = 0; i < numberOfTestCases; i++){
             List<List<Integer>> graph = generateCompleteGraph();
-            bellmanFordTestCases.put(graph, SequentialSolver.seqBellmanFord(graph));
+            long s = System.nanoTime();
+            List<Integer> ans = SequentialSolver.seqBellmanFord(graph);
+            long e = System.nanoTime();
+            bellmanFordTestCases.put(graph, new Pair<List<Integer>, Long>(ans, e-s) );
         }
-        List<HashMap<List<List<Integer>>, List<Integer>>> testCases = new ArrayList<>();
+        List<HashMap<List<List<Integer>>, Pair<List<Integer>, Long>>> testCases = new ArrayList<>();
         testCases.add(primsTestCases);
         testCases.add(bellmanFordTestCases);
         return testCases;
@@ -179,17 +188,20 @@ public class TestCaseGenerator {
         return freqs;
     }
 
-    public static HashMap<List<Integer>, List<Integer>> generateOBSTTestCases(int numberOfTestCases) {
-        HashMap<List<Integer>, List<Integer>> obstTestCases = new HashMap<>();
+    public static HashMap<List<Integer>, Pair<List<Integer>, Long>> generateOBSTTestCases(int numberOfTestCases) {
+        HashMap<List<Integer>, Pair<List<Integer>, Long>> obstTestCases = new HashMap<>();
 
         for (int i = 0; i < numberOfTestCases; i++) {
             List<Integer> freqs = generateRandomFreqs();
-            obstTestCases.put(freqs, SequentialSolver.seqOBST(freqs));
+            long startTime = System.nanoTime();
+            List<Integer> t = SequentialSolver.seqOBST(freqs);
+            long endTime = System.nanoTime();
+            obstTestCases.put(freqs, new Pair<List<Integer>, Long>(t, endTime-startTime));
         }
         return obstTestCases;
     }
 
-    public static void writeToOBSTTextFile(HashMap<List<Integer>, List<Integer>> OBSTTestCases, String fileName){
+    public static void writeToOBSTTextFile(HashMap<List<Integer>, Pair<List<Integer>, Long>> OBSTTestCases, String fileName){
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (List<Integer> input : OBSTTestCases.keySet()) {
                 // Write the input list
@@ -206,7 +218,7 @@ public class TestCaseGenerator {
 
                 writer.write("Expected Output: {");
                 // Write the corresponding output from the prefix scan
-                List<Integer> output = OBSTTestCases.get(input);
+                List<Integer> output = OBSTTestCases.get(input).first;
                 for (int i = 0; i < output.size(); i++) {
                     if (i != 0) {
                         writer.write(",");

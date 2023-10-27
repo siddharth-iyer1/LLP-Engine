@@ -64,6 +64,9 @@ public class Engine<T> {
         return endTime - startTime;
     }
 
+    public void addruntime(long s) {
+        endTime += s;
+    }
 
     public void run() {
         for(Process<T> p: allProcs) {
