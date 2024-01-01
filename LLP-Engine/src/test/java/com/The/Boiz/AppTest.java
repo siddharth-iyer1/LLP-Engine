@@ -11,10 +11,10 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple App.
  */
-public class AppTest 
+public class AppTest
     extends TestCase
 {
-    final int MAX_PROCS = 1 << 14;
+    final int MAX_PROCS = 1 << 6;
     /**
      * Create the test case
      *

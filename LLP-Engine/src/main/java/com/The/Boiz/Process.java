@@ -85,7 +85,7 @@ public class Process<T> extends Thread {
                     for(Integer temp: consumers) {
                         temp = temp / procs_per_thread;
                         // System.out.println(myTID + " notifies thread " + temp + " for val " + i);
-                        Mailbox monitor = mons.get(temp); // TODO: need to map a process to a consumer thread.
+                        Mailbox monitor = mons.get(temp);
                         synchronized(monitor) {
                             monitor.noti();
                         }
